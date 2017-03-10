@@ -3,7 +3,7 @@ var express = require('express'),
   exphbs = require('express-handlebars'),
   http = require('http'),
   mongoose = require('mongoose'),
-  routes = require('./routes');
+  routes = require('./server/routes');
 var bodyParser = require('body-parser');
 // Create an express instance and set a port variable
 var app = express();

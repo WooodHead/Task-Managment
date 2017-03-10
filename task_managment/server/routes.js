@@ -1,9 +1,9 @@
 var	JSX = require('node-jsx').install(),
 	React = require('react'),
 	ReactDOMServer  = require('react-dom/server'),
-  TaskManagmentApp = React.createFactory(require('./components/TaskManagmentApp')),
-  Task = require('./models/Task'),
-  User = require('./models/User');
+  	TaskManagmentApp = React.createFactory(require('../client/components/TaskManagmentApp')),
+  	Task = require('./models/Task'),
+  	User = require('./models/User');
 var express = require('express');
 var router = express.Router();
 

@@ -8,10 +8,10 @@ var Router=require('react-router').Router,
  IndexRoute=require('react-router').IndexRoute,
  hashHistory=require('react-router').hashHistory,
  browserHistory=require('react-router').browserHistory;
-var TaskManagmentApp = require('./components/TaskManagmentApp');
-var Users = require('./components/Users.js');
-var Tasks = require('./components/Tasks.js');
-var Assignment = require('./components/Assignment.js');
+var TaskManagmentApp = require('./client/components/TaskManagmentApp');
+var Users = require('./client/components/Users.js');
+var Tasks = require('./client/components/Tasks.js');
+var Assignment = require('./client/components/Assignment.js');
 
 // Snag the initial state that was passed from the server side
 var initialState = JSON.parse(document.getElementById('initial-state').innerHTML)
