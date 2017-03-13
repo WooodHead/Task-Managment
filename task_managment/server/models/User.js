@@ -1,17 +1,45 @@
 var mongoose = require('mongoose');
-
+const bcrypt = require('bcrypt');
 // Create a new schema for our users data
 var schema = new mongoose.Schema({
-	id1: String
-   , name       : String
-  , email     : String
-  , designation     : String
-  , phoneNo       : String
-  , Tasks       : []
+    name       : String,
+    email     {
+        type: String,
+        index: { unique: true }
+    },
+    phoneNo       : String,
+    password:String
+});
+//compare password
+schema.methods.comparePassword = function comparePassword(password, callback) {
+  bcrypt.compare(password, this.password, callback);
+};
+// The pre-save hook method
+schema.pre('save', function saveHook(next) {
+  const user = this;
+
+  // proceed further only if the password is modified or the user is new
+  if (!user.isModified('password')){
+    return next();
+  } 
+
+  return bcrypt.genSalt(function (saltError, salt){
+    if (saltError) { return next(saltError); }
+
+    return bcrypt.hash(user.password, salt, function(hashError, hash) {
+      if (hashError) { return next(hashError); }
+
+      // replace a password string with hash value
+      user.password = hash;
+
+      return next();
+    });
+  });
 });
 
+
 // Create a static getuserss method to return users data from the db
-schema.statics.getUsers = function(page, skip, callback) {
+schema.methods.getUsers = function(page, skip, callback) {
 
   var users = [];
   // Query the db, using skip and limit to achieve page chunks
@@ -28,7 +56,7 @@ schema.statics.getUsers = function(page, skip, callback) {
   });
 
 };
-schema.statics.addUser = function(user, callback) {
+schema.methods.addUser = function(user, callback) {
 
 var users = [];
   // Query the db, using skip and limit to achieve page chunks
@@ -45,7 +73,7 @@ var users = [];
   });
 
 };
-schema.statics.assignTaskToUser = function(assignment, callback) {
+schema.methods.assignTaskToUser = function(assignment, callback) {
 
 	var user = [];
   // Query the db, using skip and limit to achieve page chunks

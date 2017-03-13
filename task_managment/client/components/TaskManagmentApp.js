@@ -1,9 +1,7 @@
 /** @jsx React.DOM */
 
 var React = require('react');
-//var Users = require('./Users.js');
-//var Tasks = require('./Tasks.js');
-//var Assignment= require('./Assignment.js');
+var Auth =require('./modules/Auth1');
 var Link=require('react-router').Link;
 
 module.exports=TaskManagmentApp =React.createClass({
@@ -24,14 +22,29 @@ module.exports=TaskManagmentApp =React.createClass({
   render: function(){
 
     return (
-      <div className="tasks-app">
-		  <ul>
-               <li><Link to="tasks">Tasks</Link></li>
+   <div>
+	<nav className="navbar navbar-inverse">
+  		<div className="container-fluid">
+    		<div className="navbar-header">
+     		<a className="navbar-brand" href="#">TaskManagment</a>
+    		</div>
+    		<ul className="nav navbar-nav">
+      			<li className="active"><a href="/">Home</a></li>
+      			<li><Link to="tasks">Tasks</Link></li>
 				<li><Link to="users">Users</Link></li>
 				<li><Link to="assignment">Assignment</Link></li>
-            </ul>
-           {this.props.children}
-      </div>
+   	 		</ul>
+           {Auth.isUserAuthenticated() ? (<ul className="nav navbar-nav navbar-right">
+              <li><Link to="logout"><span className="glyphicon glyphicon-log-out"></span>Log Out</Link></li>
+            </ul>):(<ul className="nav navbar-nav navbar-right">
+            <li><Link to="signup"><span className="glyphicon glyphicon-user"></span>Sign Up</Link></li>
+      			<li><Link to="login"><span className="glyphicon glyphicon-log-in"></span>Login</Link></li></ul>)}
+    		
+  		</div>
+	</nav>
+
+  {this.props.children}</div>
+     
     )
 
   }
