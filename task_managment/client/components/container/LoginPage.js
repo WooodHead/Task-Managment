@@ -21,7 +21,8 @@ module.exports=LoginPage= React.createClass( {
       user: {
         email: '',
         password: ''
-      }
+      },
+      successMessage:successMessage
     };
   },
 
@@ -57,14 +58,14 @@ module.exports=LoginPage= React.createClass( {
           // save the token
         Auth.authenticateUser(xhr.response.token);
         // change the current URL to /
-        this.context.router.replace('/');
+        self.props.router.replace('/');
         console.log('The form is valid');
       } else {
         // failure
 
         // change the component state
-        const errors = xhr.response.errors ? xhr.response.errors : {};
-        errors.summary = xhr.response.message;
+        var errors = xhr.response.errors ? xhr.response.errors : {};
+        errors.summary1 = xhr.response.message;
 
        self.setState({
           errors:errors

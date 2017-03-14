@@ -1,31 +1,38 @@
 var React=require('React');
-module.exports= class Auth1 extends React.Component {
+var browserStorage = (typeof localStorage === 'undefined') ? null : localStorage;
+module.exports=Auth1=React.createClass( {
 
   /**
    * Authenticate a user. Save a token string in Local Storage
    *
    * @param {string} token
    */
-  static authenticateUser(token) {
-    localStorage.setItem('token', token);
-  }
+   statics: {
+  authenticateUser:function(token) {
+    if(browserStorage)
+      localStorage.setItem('token', token);
+  },
 
   /**
    * Check if a user is authenticated - check if a token is saved in Local Storage
    *
    * @returns {boolean}
    */
-  static isUserAuthenticated() {
-    return localStorage.getItem('token') !== null;
-  }
+  isUserAuthenticated:function() {
+        if(browserStorage)
+            return localStorage.getItem('token') !== null;
+          else
+            return false;
+  },
 
   /**
    * Deauthenticate a user. Remove a token from Local Storage.
    *
    */
-  static deauthenticateUser() {
-    localStorage.removeItem('token');
-  }
+   deauthenticateUser:function() {
+        if(browserStorage)
+            localStorage.removeItem('token');
+  },
 
   /**
    * Get a token value.
@@ -33,11 +40,14 @@ module.exports= class Auth1 extends React.Component {
    * @returns {string}
    */
 
-  static getToken() {
-    return localStorage.getItem('token');
-  }
-  render() { 
+  getToken:function() {
+        if(browserStorage)
+          return localStorage.getItem('token');
+        else
+          return null;
+  }},
+  render:function() { 
    return null; 
-}
+  }
 
-}
+});

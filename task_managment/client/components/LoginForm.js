@@ -30,8 +30,8 @@ module.exports=LoginForm =React.createClass({
      <div id="legend">
      <legend >Login</legend>
      </div>
-      {successMessage && <p className="success">{successMessage}</p>}
-      {errors.summary && <p className="error">{errors.summary}</p>}
+      {this.props.successMessage && <span className="help-block">{this.props.successMessage}</span>}
+      {this.props.errors.summary1 && <span className="help-block">{this.props.errors.summary1}</span>}
       <div className="form-group error">
         <input  className="form-control" type='email' name="email" placeholder="Email" className="input-xlarge" onChange={this.props.onChangeInput}/>
         <span className="help-block">{this.props.errors.email}</span>

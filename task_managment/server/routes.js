@@ -5,9 +5,10 @@ var	JSX = require('node-jsx').install(),
   	Task = require('./models/Task'),
   	User = require('./models/User');
 var express = require('express');
+var mongoose = require('mongoose');
+var nev = require('./passport/emailConfig');
 var router = express.Router();
-
- router.get(['/','/tasks','/users','/assignment',],function(req, res,next) {
+ router.get('/',function(req, res,next) {
     User.getUsers(0,0, function(users) {
 		var users=users;
 			  
@@ -15,43 +16,40 @@ var router = express.Router();
 		var tasks=tasks;
 		var markup = ReactDOMServer.renderToString(
 			TaskManagmentApp({
-			users: users,
-			tasks: tasks
+			users: '',
+			tasks: ''
 			})
 		);
 
       // Render our 'home' template
 		res.render('home', {
 			markup: markup, // Pass rendered react markup
-			state: JSON.stringify({users:users,tasks:tasks}) // Pass current state to client side
+			state: JSON.stringify({users:'',tasks:''}) // Pass current state to client side
 		});
 	  });
 
     });
   });
- 
-  router.post('/addUser',function(req, res,next) {
-	var user=req.body.user;
-    User.addUser(user, function(users) {
 
-      res.send(users);
 
-    });
+ router.get('/email-verification/:URL', function(req, res) {
+  var url = req.params.URL;
+
+  nev.confirmTempUser(url, function(err, user) {
+    if (user) {
+      nev.sendConfirmationEmail(user.email, function(err, info) {
+        if (err) {
+          return res.status(404).send('ERROR: sending confirmation email FAILED');
+        }
+        res.json({
+          msg: 'CONFIRMED!',
+          info: info
+        });
+      });
+    } else {
+      return res.status(404).send('ERROR: confirming temp user FAILED');
+    }
   });
-  router.post('/addTask',function(req, res,next) {
-	var task=req.body.task;
-    Task.addTask(task, function(tasks) {
-
-      res.send(tasks);
-
-    });
-  });
-  router.post('/assignTask',function(req, res,next) {
-	var assignment=req.body.assignment;
-    User.assignTaskToUser(assignment, function(user) {
-		res.send(user);
-    });
-  });
-
+});
 
 module.exports = router;

@@ -23,6 +23,7 @@ module.exports=SignUpForm =React.createClass({
     <div id="legend">
       <legend >Sign Up</legend>
       </div>
+      {this.props.errors.summary1 && <span className="help-block">{this.props.errors.summary1}</span>}
       <div className="form-group error">
         <input className="form-control" type='text' name="name" placeholder="" className="input-xlarge"  onChange={this.props.onChangeInput}/>
            <span className="help-block">{this.props.errors.name}</span>

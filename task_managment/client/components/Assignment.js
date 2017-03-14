@@ -1,4 +1,5 @@
 var React = require('react');
+var Auth =require('./modules/Auth1');
 
 module.exports=Assignment = React.createClass({
 
@@ -12,11 +13,14 @@ module.exports=Assignment = React.createClass({
 	},
     AddAssignment: function(assignment){
 		var request = new XMLHttpRequest(), self = this;
-		 request.open("POST", "/assignTask", true);
+		 request.open("POST", "/api/assignTask", true);
 		 request.setRequestHeader("Content-type", "application/json");
+		 request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
 		 request.onreadystatechange = function() {//Call a function when the state changes.
 		if(request.readyState == 4 && request.status == 200) {
-			var updated = self.state.users;
+			var updated = [];
+			if(self.state.users)
+				updated =self.state.users;
 			var res=JSON.parse(request.responseText);
 			if(res){
 				updated.forEach(function(user) {
@@ -78,7 +82,6 @@ AssignList = React.createClass({
                 <thead>
 					<tr>
                         <th>Name</th>
-                        <th>Position</th>
 						<th>Task Name</th>
                          <th>Email</th>
                     </tr>
@@ -98,7 +101,6 @@ AssignObj = React.createClass({
     return (
         <tr className="DirectoryItem">
             <td className="DirectoryItem__name">{ this.props.user.name }</td>
-            <td className="DirectoryItem__position">{ this.props.user.designation }</td>
 			<td className="DirectoryItem__position">{ this.props.task.task_Name }</td>
             <td className="DirectoryItem__email">{ this.props.user.email }</td>
         </tr>

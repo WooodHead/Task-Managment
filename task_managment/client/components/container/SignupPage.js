@@ -67,12 +67,12 @@ module.exports= SignupPage = React.createClass( {
         // set a message
         localStorage.setItem('successMessage', xhr.response.message);
         console.log('The form is valid');
-        self.context.router.replace('/login');
+        self.props.router.replace('/login');
       } else {
         // failure
 
-        const errors = xhr.response.errors ? xhr.response.errors : {};
-        errors.summary = xhr.response.message;
+        var errors = xhr.response.errors ? xhr.response.errors : {};
+        errors.summary1 = xhr.response.message;
 
        self.setState({
           errors:errors
@@ -80,13 +80,6 @@ module.exports= SignupPage = React.createClass( {
       }
     });
     xhr.send(formData);
-
-
-
-
-
-
-
 
   },
 

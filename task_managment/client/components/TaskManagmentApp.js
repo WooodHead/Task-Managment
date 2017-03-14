@@ -28,12 +28,12 @@ module.exports=TaskManagmentApp =React.createClass({
     		<div className="navbar-header">
      		<a className="navbar-brand" href="#">TaskManagment</a>
     		</div>
-    		<ul className="nav navbar-nav">
-      			<li className="active"><a href="/">Home</a></li>
-      			<li><Link to="tasks">Tasks</Link></li>
+      	{Auth.isUserAuthenticated() ? (<ul className="nav navbar-nav">
+          <li className="active"><Link to="tasks">Tasks</Link></li>
 				<li><Link to="users">Users</Link></li>
-				<li><Link to="assignment">Assignment</Link></li>
-   	 		</ul>
+				<li><Link to="assignment">Assignment</Link></li></ul>):(<ul className="nav navbar-nav"></ul>)}
+
+   	 		
            {Auth.isUserAuthenticated() ? (<ul className="nav navbar-nav navbar-right">
               <li><Link to="logout"><span className="glyphicon glyphicon-log-out"></span>Log Out</Link></li>
             </ul>):(<ul className="nav navbar-nav navbar-right">

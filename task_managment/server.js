@@ -4,6 +4,7 @@ var express = require('express'),
   http = require('http'),
   mongoose = require('mongoose'),
   routes = require('./server/routes'),
+  api = require('./server/api'),
   passport=require('passport'),
   authRoutes = require('./server/auth');
 var bodyParser = require('body-parser');
@@ -42,9 +43,13 @@ app.use(function(req,res,next){
     next();
 });
 var authCheckMiddleware = require('./server/middleware/auth-check');
-app.use('/', authCheckMiddleware);
+app.use('/api', authCheckMiddleware);
 app.use('/auth', authRoutes);
 app.use('/', routes);
+app.use('/api', api);
+
+
+
 
 
 

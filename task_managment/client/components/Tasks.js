@@ -1,4 +1,5 @@
 var React = require('react');
+var Auth =require('./modules/Auth1');
 
 
 var TaskForm = require('./TaskForm.js');
@@ -16,11 +17,14 @@ module.exports=Tasks = React.createClass({
 		AddTask: function(task){
 		
 			var request = new XMLHttpRequest(), self = this;
-			request.open("POST", "/addTask", true);
+			request.open("POST", "/api/addTask", true);
 			request.setRequestHeader("Content-type", "application/json");
+			request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
 			request.onreadystatechange = function() {//Call a function when the state changes.
 			if(request.readyState == 4 && request.status == 200) {
-			var updated = self.state.tasks;
+			var updated =[];
+			if(self.state.tasks)
+			 	updated=self.state.tasks;
       // Push them onto the end of the current tweets array
 			if(request.responseText){
 				updated.push(JSON.parse(request.responseText));

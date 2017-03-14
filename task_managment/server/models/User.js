@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 // Create a new schema for our users data
 var schema = new mongoose.Schema({
     name       : String,
-    email     {
+    email    : {
         type: String,
         index: { unique: true }
     },
@@ -39,11 +39,11 @@ schema.pre('save', function saveHook(next) {
 
 
 // Create a static getuserss method to return users data from the db
-schema.methods.getUsers = function(page, skip, callback) {
+schema.statics.getUsers = function(page, skip, callback) {
 
   var users = [];
   // Query the db, using skip and limit to achieve page chunks
-  User.find({},'id1 name email designation phoneNo Tasks',{}).exec(function(err,docs){
+  User.find({},'name email phoneNo ',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -56,7 +56,7 @@ schema.methods.getUsers = function(page, skip, callback) {
   });
 
 };
-schema.methods.addUser = function(user, callback) {
+schema.statics.addUser = function(user, callback) {
 
 var users = [];
   // Query the db, using skip and limit to achieve page chunks
@@ -73,7 +73,7 @@ var users = [];
   });
 
 };
-schema.methods.assignTaskToUser = function(assignment, callback) {
+schema.statics.assignTaskToUser = function(assignment, callback) {
 
 	var user = [];
   // Query the db, using skip and limit to achieve page chunks

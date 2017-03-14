@@ -1,6 +1,7 @@
 var React = require('react');
 
 var UserForm = require('./UserForm.js');
+var Auth =require('./modules/Auth1');
 
 module.exports=Users = React.createClass({
 
@@ -14,11 +15,14 @@ module.exports=Users = React.createClass({
     AddEntry: function(user){
 		
 		 var request = new XMLHttpRequest(), self = this;
-		 request.open("POST", "/addUser", true);
+		 request.open("POST", "/api/addUser", true);
 		 request.setRequestHeader("Content-type", "application/json");
+         request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
 		 request.onreadystatechange = function() {//Call a function when the state changes.
     if(request.readyState == 4 && request.status == 200) {
-			var updated = self.state.users;
+			var updated = [];
+            if(self.state.users)
+               updated= self.state.users;
       // Push them onto the end of the current tweets array
 	  if(request.responseText){
 			updated.push(JSON.parse(request.responseText));
@@ -62,7 +66,6 @@ UserList = React.createClass({
                         <tr>
                             
                             <th>Name</th>
-                            <th>Position</th>
                             <th>Email</th>
 							<th>Phone</th>
                         </tr>
@@ -82,7 +85,6 @@ UserObj = React.createClass({
     return (
         <tr className="DirectoryItem">
             <td className="DirectoryItem__name">{ this.props.user.name }</td>
-            <td className="DirectoryItem__position">{ this.props.user.designation }</td>
             <td className="DirectoryItem__email">{ this.props.user.email }</td>
 			<td className="DirectoryItem__position">{ this.props.user.phoneNo}</td>
         </tr>

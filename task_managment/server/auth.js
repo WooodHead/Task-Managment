@@ -1,5 +1,7 @@
 var express = require('express');
 var validator = require('validator');
+var passport = require('passport');
+
 var authRouter=new express.Router();
 
 function validateSignupForm(payload) {
@@ -86,13 +88,13 @@ return passport.authenticate('local-signup', function(err) {
 
       return res.status(400).json({
         success: false,
-        message: 'Could not process the form.'
+        message: 'Could not process the form.'+err
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'You have successfully signed up! Now you should be able to log in.'
+      message: 'You have successfully signed up! verification email is sent Please verify before log in.'
     });
   })(req, res, next);
 
