@@ -10,14 +10,14 @@ module.exports=TaskManagmentApp =React.createClass({
 	getInitialState: function(props){
 		props = props || this.props;
 		return {
-		users: props.users,
-		tasks:props.tasks
+	
 		};
 	},
 	componentWillReceiveProps:function(newProps, oldProps){
 		this.setState(newProps);
 	},
-
+  componentDidMount: function() {
+  },
   // Render the component
   render: function(){
 
@@ -29,11 +29,11 @@ module.exports=TaskManagmentApp =React.createClass({
      		<a className="navbar-brand" href="#">TaskManagment</a>
     		</div>
       	{Auth.isUserAuthenticated() ? (<ul className="nav navbar-nav">
-          <li className="active"><Link to="tasks">Tasks</Link></li>
-				<li><Link to="users">Users</Link></li>
-				<li><Link to="assignment">Assignment</Link></li></ul>):(<ul className="nav navbar-nav"></ul>)}
-
-   	 		
+          <li className="active"><Link to="projects">Projects</Link></li>
+				<li><Link to="tasks">Tasks</Link></li>
+				<li><Link to="activties">Current Activties</Link></li></ul>):(<ul className="nav navbar-nav">
+        <li className="active"><Link to="home">Home</Link></li>
+        </ul>)}
            {Auth.isUserAuthenticated() ? (<ul className="nav navbar-nav navbar-right">
               <li><Link to="logout"><span className="glyphicon glyphicon-log-out"></span>Log Out</Link></li>
             </ul>):(<ul className="nav navbar-nav navbar-right">

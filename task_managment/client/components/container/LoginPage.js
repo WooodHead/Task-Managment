@@ -58,8 +58,7 @@ module.exports=LoginPage= React.createClass( {
           // save the token
         Auth.authenticateUser(xhr.response.token);
         // change the current URL to /
-        self.props.router.replace('/');
-        console.log('The form is valid');
+        self.props.router.replace('/projects');
       } else {
         // failure
 

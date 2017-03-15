@@ -24,14 +24,11 @@ nev.configure({
     console.log(err);
     return;
   }
-  console.log('configured: ' + (typeof options === 'object'));
 });
  nev.generateTempUserModel(User, function(err, tempUserModel) {
   if (err) {
     console.log(err);
     return;
   }
-
-  console.log('generated temp user model: ' + (typeof tempUserModel === 'function'));
 });
 module.exports = nev;

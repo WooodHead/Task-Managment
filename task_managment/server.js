@@ -8,6 +8,8 @@ var express = require('express'),
   passport=require('passport'),
   authRoutes = require('./server/auth');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 // Create an express instance and set a port variable
 var app = express();
 var port = process.env.PORT || 8081;
@@ -26,8 +28,14 @@ mongoose.connect('mongodb://localhost/task_managment');
 
 app.use("/", express.static(__dirname + "/public/"));
 app.use('/', express.static(__dirname + '/node_modules/bootstrap/dist/'));
+app.use(cookieParser());
+app.use(session({secret: 'ssshhhhh',
+				resave: false,
+  				saveUninitialized: true})
+		);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
 // pass the passport middleware
 app.use(passport.initialize());
 // load passport strategies

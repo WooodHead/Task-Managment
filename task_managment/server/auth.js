@@ -3,7 +3,7 @@ var validator = require('validator');
 var passport = require('passport');
 
 var authRouter=new express.Router();
-
+var sess;
 function validateSignupForm(payload) {
   const errors = {};
   var isFormValid = true;
@@ -126,7 +126,8 @@ return passport.authenticate('local-login', function(err, token, userData) {
       });
     }
 
-
+    sess = req.session;
+    sess.email=req.body.email;
     return res.json({
       success: true,
       message: 'You have successfully logged in!',
