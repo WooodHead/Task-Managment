@@ -25,15 +25,15 @@ module.exports=SignUpForm =React.createClass({
       </div>
       {this.props.errors.summary1 && <span className="help-block">{this.props.errors.summary1}</span>}
       <div className="form-group error">
-        <input className="form-control" type='text' name="name" placeholder="" className="input-xlarge"  onChange={this.props.onChangeInput}/>
+        <input className="form-control" type='text' name="name" placeholder="Name" className="input-xlarge"  onChange={this.props.onChangeInput}/>
            <span className="help-block">{this.props.errors.name}</span>
       </div>
        <div className="form-group error">
-        <input className="form-control" type='email' name="email" placeholder="" className="input-xlarge"  onChange={this.props.onChangeInput}/>
+        <input className="form-control" type='email' name="email" placeholder="Email" className="input-xlarge"  onChange={this.props.onChangeInput}/>
         <span className="help-block">{this.props.errors.email}</span>
       </div>
       <div className="form-group error">
-        <input className="form-control" type='password' name="password" placeholder="" className="input-xlarge" onChange={this.props.onChangeInput}/>
+        <input className="form-control" type='password' name="password" placeholder="Password" className="input-xlarge" onChange={this.props.onChangeInput}/>
         <span className="help-block">{this.props.errors.password}</span>
       </div>
       <div className="form-group">
