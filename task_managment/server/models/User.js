@@ -43,7 +43,7 @@ schema.statics.getUsers = function(page, skip, callback) {
 
   var users = [];
   // Query the db, using skip and limit to achieve page chunks
-  User.find({},'name email phoneNo ',{}).exec(function(err,docs){
+  User.find({},'name email phoneNo',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -52,6 +52,24 @@ schema.statics.getUsers = function(page, skip, callback) {
 
     // Pass them back to the specified callback
     callback(users);
+
+  });
+
+};
+// get user by email
+schema.statics.getUserByEmail = function(useremail, callback) {
+
+  var user = [];
+  // Query the db, using skip and limit to achieve page chunks
+  User.findOne({email:useremail},'name email phoneNo',{}).exec(function(err,docs){
+
+    // If everything is cool...
+    if(!err) {
+      user = docs;  // We got users
+    }
+
+    // Pass them back to the specified callback
+    callback(user);
 
   });
 

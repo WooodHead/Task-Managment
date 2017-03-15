@@ -2,18 +2,22 @@ var mongoose = require('mongoose');
 
 // Create a new schema for our tweet data
 var schema = new mongoose.Schema({
-    idt       : String
-  , task_Name     : String
-  , Description     : String
-  , duration       : String
+    name        : String,
+    description : String,
+    status      : String,
+    estimation  : String,
+    created_at  : Date,
+    updated_at  : Date,
+    project_id  : String,
+    user_id     : String
 });
 
 // Create a static 
-schema.statics.getTasks = function(page, skip, callback) {
+schema.statics.getTasksByProjectsAndUser = function(queryparam, callback) {
 
   var tasks = [];
   // Query the db, using skip and limit to achieve page chunks
-  Task.find({},'idt task_Name Description duration',{}).exec(function(err,docs){
+  Task.find({queryparam},'name description status estimation',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -29,6 +33,8 @@ schema.statics.getTasks = function(page, skip, callback) {
 schema.statics.addTask = function(task, callback) {
 
 var tasks = [];
+    task.created_at=new Date();
+    task.updated_at=new Date();
   // Query the db, using skip and limit to achieve page chunks
   Task.create(task,function(err,docs){
 

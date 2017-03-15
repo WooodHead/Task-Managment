@@ -4,6 +4,9 @@ var	JSX = require('node-jsx').install(),
 	ReactDOMServer  = require('react-dom/server'),
   	TaskManagmentApp = React.createFactory(require('../client/components/TaskManagmentApp')),
 	Task = require('./models/Task'),
+	Project = require('./models/Project'),
+	Comment = require('./models/Comment'),
+	Attachment = require('./models/Attachment'),
   	User = require('./models/User');
 var router = new express.Router();
 router.get(['/tasks','/users','/assignment',],function(req, res,next) {
@@ -50,5 +53,27 @@ router.get(['/tasks','/users','/assignment',],function(req, res,next) {
 		res.send(user);
     });
   });
-
+	router.post('/addProject',function(req, res,next) {
+		var project=req.body.project;
+		User.getUserByEmail(req.session.email,function(user){
+			project.users=[];
+			if(user._id){
+				project.users.push(user._id);
+    			Project.addProject(project, function(result) {
+     		 		res.send(result);
+    			});
+    		}else
+    		  res.send({error:'cannot find logged user'});
+    });
+  });
+	router.get('/getProjectByUser',function(req, res,next) {
+		User.getUserByEmail(req.session.email,function(user){
+			if(user._id){
+    			Project.getProjects(user._id, function(result) {
+     		 		res.send(result);
+    			});
+    		}else
+    		  res.send({error:'cannot find logged user'});
+    });
+  });
 module.exports = router;

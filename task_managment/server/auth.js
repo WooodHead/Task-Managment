@@ -128,6 +128,7 @@ return passport.authenticate('local-login', function(err, token, userData) {
 
     sess = req.session;
     sess.email=req.body.email;
+    console.log(userData);
     return res.json({
       success: true,
       message: 'You have successfully logged in!',
