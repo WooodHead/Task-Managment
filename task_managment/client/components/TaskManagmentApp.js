@@ -29,9 +29,7 @@ module.exports=TaskManagmentApp =React.createClass({
      		<a className="navbar-brand" href="#">TaskManagment</a>
     		</div>
       	{Auth.isUserAuthenticated() ? (<ul className="nav navbar-nav">
-          <li className="active"><Link to="projects">Projects</Link></li>
-				<li><Link to="tasks">Tasks</Link></li>
-				<li><Link to="activties">Current Activties</Link></li></ul>):(<ul className="nav navbar-nav">
+          <li className="active"><Link to="dashboard">Dashboard</Link></li></ul>):(<ul className="nav navbar-nav">
         <li className="active"><Link to="home">Home</Link></li>
         </ul>)}
            {Auth.isUserAuthenticated() ? (<ul className="nav navbar-nav navbar-right">

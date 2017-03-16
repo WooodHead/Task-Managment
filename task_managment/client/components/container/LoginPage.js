@@ -58,7 +58,7 @@ module.exports=LoginPage= React.createClass( {
           // save the token
         Auth.authenticateUser(xhr.response.token);
         // change the current URL to /
-        self.props.router.replace('/projects');
+        self.props.router.replace('/dashboard');
       } else {
         // failure
 

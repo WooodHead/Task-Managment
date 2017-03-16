@@ -10,6 +10,8 @@ var Router=require('react-router').Router,
  browserHistory=require('react-router').browserHistory;
 var TaskManagmentApp = require('./client/components/TaskManagmentApp');
 var Home = require('./client/components/Home.js');
+var Dashboard = require('./client/components/Dashboard.js');
+
 var Projects = require('./client/components/Projects.js');
 var Tasks = require('./client/components/Tasks.js');
 var Activties = require('./client/components/Activties.js');
@@ -23,7 +25,7 @@ var handleLogout  = require('./client/components/container/handleLogout.js');
 var initialState = JSON.parse(document.getElementById('initial-state').innerHTML)
 var redir=function(location, callback){
    if(Auth.isUserAuthenticated()) {
-      callback(null, Projects);
+      callback(null, Dashboard);
    } else {
       callback(null, Home);}
 };
@@ -33,9 +35,11 @@ ReactDOM.render(( <Router history = {browserHistory}>
       <Route path = "/" component = {TaskManagmentApp}  >
          <IndexRoute getComponent = {redir}/>
          <Route path = "home" component = {Home} />
-         <Route path = "projects" component = {Projects} />
-         <Route path = "tasks" component = {Tasks} />
-         <Route path = "activties" component = {Activties} />
+         <Route path = "dashboard" component = {Dashboard} >
+            <Route path = "projects" component={Projects}/>
+            <Route path = "activties" component = {Activties} />
+            <Route path = "tasks" component = {Tasks} />
+        </Route>
          <Route path = "logout" onEnter={handleLogout}/>
          <Route path = "login" component = {LoginPage} />
          <Route path = "signup" component = {SignupPage} />

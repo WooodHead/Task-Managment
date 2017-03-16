@@ -9,11 +9,6 @@ var mongoose = require('mongoose');
 var nev = require('./passport/emailConfig');
 var router = express.Router();
  router.get('/',function(req, res,next) {
-    User.getUsers(0,0, function(users) {
-		var users=users;
-			  
-	  Task.getTasks(0,0,function(tasks){
-		var tasks=tasks;
 		var markup = ReactDOMServer.renderToString(
 			TaskManagmentApp({
 			users: '',
@@ -26,9 +21,7 @@ var router = express.Router();
 			markup: markup, // Pass rendered react markup
 			state: JSON.stringify({users:'',tasks:''}) // Pass current state to client side
 		});
-	  });
 
-    });
   });
 
 

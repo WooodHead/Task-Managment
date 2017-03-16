@@ -9,11 +9,11 @@ var schema = new mongoose.Schema({
 });
 
 // Create a static 
-schema.statics.getCommentsByTaskId= function(taskid, skip, callback) {
+schema.statics.getCommentsByTaskId= function(taskid, callback) {
 
   var comments = [];
   // Query the db, using skip and limit to achieve page chunks
-  Comment.find({task_id:taskid},'details created_at user_id task_id',{}).exec(function(err,docs){
+  Comment.find({task_id:taskid},'details created_at task_id',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -27,11 +27,11 @@ schema.statics.getCommentsByTaskId= function(taskid, skip, callback) {
 
 };
 // Create a static 
-schema.statics.getCommentsByUserId= function(userid, skip, callback) {
+schema.statics.getCommentsByUserId= function(userid, callback) {
 
   var comments = [];
   // Query the db, using skip and limit to achieve page chunks
-  Comment.find({user_id:userid},'details created_at user_id task_id',{}).exec(function(err,docs){
+  Comment.find({user_id:userid},'details created_at task_id',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -45,11 +45,11 @@ schema.statics.getCommentsByUserId= function(userid, skip, callback) {
 
 };
 // Create a static 
-schema.statics.getCommentsByUserAndTaskID= function(query, skip, callback) {
+schema.statics.getCommentsByUserAndTaskID= function(query, callback) {
 
   var comments = [];
   // Query the db, using skip and limit to achieve page chunks
-  Comment.find({user_id:query.userid,task_id:query.taskid},'details created_at user_id task_id',{}).exec(function(err,docs){
+  Comment.find({user_id:query.userid,task_id:query.taskid},'details created_at task_id',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {

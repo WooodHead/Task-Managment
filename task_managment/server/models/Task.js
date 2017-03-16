@@ -13,11 +13,29 @@ var schema = new mongoose.Schema({
 });
 
 // Create a static 
-schema.statics.getTasksByProjectsAndUser = function(queryparam, callback) {
+schema.statics.getTasksByProjectsAndUser = function(queryparams, callback) {
 
   var tasks = [];
   // Query the db, using skip and limit to achieve page chunks
-  Task.find({queryparam},'name description status estimation',{}).exec(function(err,docs){
+  Task.find(queryparams,'name description status estimation created_at updated_at',{}).exec(function(err,docs){
+
+    // If everything is cool...
+    if(!err) {
+      tasks = docs;  // We got users
+    }
+
+    // Pass them back to the specified callback
+    callback(tasks);
+
+  });
+
+};
+// Create a static 
+schema.statics.getTasksByProject = function(projectid, callback) {
+
+  var tasks = [];
+  // Query the db, using skip and limit to achieve page chunks
+  Task.find({project_id:projectid},'name description status estimation created_at updated_at',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
