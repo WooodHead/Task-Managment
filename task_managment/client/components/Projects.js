@@ -1,4 +1,5 @@
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Auth =require('./modules/Auth1');
 
 module.exports=Projects = React.createClass({
@@ -41,13 +42,14 @@ module.exports=Projects = React.createClass({
         this.setState({view: {showModal: false}})
     },
     handleShowModal:function(){
-        $(this.refs.modal1).modal('show');
-        //this.refs.modal.findDOMNode().showModal();
+        console.log(ReactDOM);
+        console.log(ReactDOM.findDOMNode(this.refs.modal));
+        $(ReactDOM.findDOMNode(this.refs.modal)).modal();
 
     },
     render:function(){
 		return(
-            <div>
+            <div >
                 <div className="row">
                     <div className="col-lg-12">
                         <h1 className="page-header">Projects</h1>
@@ -77,8 +79,8 @@ module.exports=Projects = React.createClass({
                         </div>
                     </div>
                 </div>
-                 <div className="row col-lg-12">
-                    <addEditProjectDialog ref='modal1'/>
+                <div className="row col-lg-12">
+                <ProjectDialog ref='modal'/>
                 </div>
             </div>            
 		)
@@ -133,10 +135,10 @@ ProjectObj = React.createClass({
     )
     }
 });
-addEditProjectDialog=React.createClass({
+ProjectDialog=React.createClass({
     render:function(){
         return (
-          <div className="modal hide">
+            <div className="modal fade">
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">

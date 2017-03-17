@@ -13,6 +13,7 @@ var session = require('express-session');
 // Create an express instance and set a port variable
 var app = express();
 var port = process.env.PORT || 8081;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 // Set handlebars as the templating engine
 app.engine('handlebars', exphbs({ defaultLayout: 'main'}));
