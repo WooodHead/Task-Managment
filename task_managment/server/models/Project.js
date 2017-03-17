@@ -30,6 +30,23 @@ schema.statics.getProjects= function(userid, callback) {
   });
 
 };
+schema.statics.getProjectsName = function(userid, callback) {
+
+  var projects = [];
+  // Query the db, using skip and limit to achieve page chunks
+  Project.find({users:userid},'p_name',{}).exec(function(err,docs){
+
+    // If everything is cool...
+    if(!err) {
+      projects = docs;  // We got users
+    }
+
+    // Pass them back to the specified callback
+    callback(projects);
+
+  });
+
+};
 schema.statics.addProject = function(project, callback) {
   project.created_at=new Date();
   project.updated_at=new Date();

@@ -16,25 +16,29 @@ module.exports=Dashboard = React.createClass({
             <div className="navbar-default sidebar" role="navigation">
                 <div className="sidebar-nav navbar-collapse">
                     <ul className="nav in" id="side-menu">
-                        <li className="sidebar-search">
-                            <div className="input-group custom-search-form">
-                                <input type="text" className="form-control" placeholder="Search..."/>
-                                <span className="input-group-btn">
-                                <button className="btn btn-default" type="button">
-                                    <i className="fa fa-search"></i>
-                                </button>
-                                </span>
-                            </div>
-                        </li>
-                        <li className="active">
-                            <Link to='/dashboard/projects'> Projects</Link>
-                        </li>
-                        <li>
-                           <Link to='/dashboard/activties'> Activties</Link>
-                        </li>
-                        <li>
-                           <Link to='/dashboard/tasks'> Tasks</Link>
-                        </li>
+                            <li className="sidebar-search">
+                                <div className="input-group custom-search-form">
+                                    <input type="text" className="form-control" placeholder="Search..."/>
+                                    <span className="input-group-btn">
+                                    <button className="btn btn-default" type="button">
+                                        <i className="fa fa-search"></i>
+                                    </button>
+                                    </span>
+                                </div>
+                            </li>
+                            <hr/>
+                            <li className="active">
+                                <Link to='/dashboard/projects'> Projects</Link>
+                            </li>
+                            <hr/>
+                            <li>
+                               <Link to='/dashboard/activties'> Activties</Link>
+                            </li>
+                            <hr/>
+                            <li>
+                               <Link to='/dashboard/tasks'> Tasks</Link>
+                            </li>
+                            <hr/>
                     </ul>
                 </div>
             </div>

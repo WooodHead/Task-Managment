@@ -13,7 +13,7 @@ var schema = new mongoose.Schema({
 });
 
 // Create a static 
-schema.statics.getTasksByProjectsAndUser = function(queryparams, callback) {
+schema.statics.getTasksByQuery = function(queryparams, callback) {
 
   var tasks = [];
   // Query the db, using skip and limit to achieve page chunks

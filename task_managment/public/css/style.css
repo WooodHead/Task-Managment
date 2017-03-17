@@ -5,20 +5,5 @@ body
 
     margin: 0;
     padding: 0 0 40px 0;
-    color: white;
 }
 
-@media (max-width: 500px)
-{
-    footer a.link-back
-    {
-        font-size: 0;
-    }
-    footer a:after
-    {
-        font-size: 12px;
-
-        content: '← Back To Learning React';
-
-    }
-}

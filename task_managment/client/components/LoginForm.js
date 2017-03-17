@@ -23,8 +23,6 @@ module.exports=LoginForm =React.createClass({
 
     return (
 
-//
-
 <form className="form-horizontal" onSubmit={this.props.onSubmitForm}>
     <fieldset>
      <div id="legend">
@@ -49,7 +47,6 @@ module.exports=LoginForm =React.createClass({
       </div> </div>
       </fieldset>
     </form>
-     
     )
 
   }

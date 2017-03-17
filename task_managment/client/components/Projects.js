@@ -8,7 +8,13 @@ module.exports=Projects = React.createClass({
 		 props = props || this.props;
         return {projects:props.projects,
                 errors:props.errors,
-                view: {showModal: true}
+                project:{
+                    _id:'',
+                    p_name:'',
+                    description:'',
+                    status:'',
+                    estimation:''
+                }
                 };
 	},
     componentDidMount: function(){
@@ -42,17 +48,52 @@ module.exports=Projects = React.createClass({
         this.setState({view: {showModal: false}})
     },
     handleShowModal:function(){
-        console.log(ReactDOM);
-        console.log(ReactDOM.findDOMNode(this.refs.modal));
-        $(ReactDOM.findDOMNode(this.refs.modal)).modal();
+        $(ReactDOM.findDOMNode(this.refs.projectmodal)).modal();
 
     },
+    changeProject:function(event) {
+        const field = event.target.name;
+         const project = this.state.project;
+        project[field] = event.target.value;
+
+        this.setState({project:project});
+  },
+  processForm:function(event) {
+    // prevent default action. in this case, action is the form submission event
+    event.preventDefault();
+
+   /* console.log('name:', this.state.user.name);
+    console.log('email:', this.state.user.email);
+    console.log('password:', this.state.user.password);*/
+    // create a string for an HTTP body message
+        var request = new XMLHttpRequest(), self = this;
+        request.open("POST", "/api/addProject", true);
+        request.setRequestHeader("Content-type", "application/json");
+        request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
+        request.onreadystatechange = function() {//Call a function when the state changes.
+            if(request.readyState == 4 && request.status == 200) {
+            var updated =[];
+            if(self.state.projects)
+                updated=self.state.projects;
+      // Push them onto the end of the current tweets array
+            if(request.responseText){
+                updated.push(JSON.parse(request.responseText));
+            }
+            self.setState({projects: updated});
+            }
+            $(ReactDOM.findDOMNode(self.refs.projectmodal)).modal('hide');
+            $(ReactDOM.findDOMNode(self.refs.projectmodal)).find("input,textarea,select").val('').end()
+            .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+         }
+        request.send(JSON.stringify({project:self.state.project}));
+
+  },
     render:function(){
 		return(
             <div >
                 <div className="row">
                     <div className="col-lg-12">
-                        <h1 className="page-header">Projects</h1>
+                        <h2 className="page-header">Projects</h2>
                         <div className="row">
                         <div className="col-sm-6">
                             <div className="dt-buttons btn-group">
@@ -80,7 +121,7 @@ module.exports=Projects = React.createClass({
                     </div>
                 </div>
                 <div className="row col-lg-12">
-                <ProjectDialog ref='modal'/>
+                <ProjectDialog ref='projectmodal' errors={this.state.errors} onChangeInput={this.changeProject} onSubmitForm={this.processForm}/>
                 </div>
             </div>            
 		)
@@ -100,7 +141,7 @@ ProjectsTable= React.createClass({
        }
 
         return  (
-            <div className="table-responsive">
+            <div className="table-responsive" data-toggle="table"   data-click-to-select="true">
                 <table className="table table-striped table-bordered table-hover">
                     <thead>
                         <tr role="row">
@@ -146,11 +187,43 @@ ProjectDialog=React.createClass({
                   <h4 className="modal-title">Add Project</h4>
                 </div>
                 <div className="modal-body">
-                  <p>modal body</p>
+                 <form className="form-horizontal" onSubmit={this.props.onSubmitForm}>
+                    <fieldset>
+
+                        <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Name</label>
+                            <div className="col-sm-10">
+                                <input type="text" className="form-control" name="p_name" placeholder="Name" onChange={this.props.onChangeInput}/>
+                            </div>
+                         </div>
+
+                           <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Description</label>
+                            <div className="col-sm-10">
+                                <input type="text" className="form-control" name="description" placeholder="Description" onChange={this.props.onChangeInput}/>
+                            </div>
+                         </div>
+                         
+                          <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputStatus">Status</label>
+                            <div className="col-sm-10">
+                                <input type="text" className="form-control" name="status" placeholder="Status" onChange={this.props.onChangeInput}/>
+                            </div>
+                         </div>
+
+                          <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputEstimation">Estimation</label>
+                            <div className="col-sm-10">
+                                <input type="text" className="form-control" name="estimation" placeholder="Estimation" onChange={this.props.onChangeInput}/>
+                            </div>
+                         </div>
+
+                       </fieldset>
+                    </form>
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-                  <button type="button" className="btn btn-primary">Save changes</button>
+                  <button type="button" className="btn btn-primary" onClick={this.props.onSubmitForm}>Save changes</button>
                 </div>
               </div>
             </div>

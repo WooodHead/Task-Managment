@@ -44,8 +44,8 @@ router.get('/tasks',function(req, res,next) {
     });
   });
   router.get('/getTasksByProject',function(req, res,next) {
-  		var projectid=req.query.projectid;
-    	Task.getTasksByProject(projectid, function(result) {
+      var queryParams={project_id:req.query.projectid};
+    	Task.getTasksByQuery(queryParams, function(result) {
      		 res.send(result);
     	});
   });
@@ -53,11 +53,22 @@ router.get('/tasks',function(req, res,next) {
 		User.getUserByEmail(req.session.email,function(user){
 			if(user._id){
 				var queryParams={user_id:user._id,project_id:req.query.projectid};
-    			Task.getTasksByProjectsAndUser(queryParams, function(result) {
+    			Task.getTasksByQuery(queryParams, function(result) {
      		 		res.send(result);
     			});
     		}else
     		  res.send({error:'cannot find logged user'});
+    });
+  });
+  router.get('/getTasksByUser',function(req, res,next) {
+    User.getUserByEmail(req.session.email,function(user){
+      if(user._id){
+        var queryParams={user_id:user._id};
+          Task.getTasksByQuery(queryParams, function(result) {
+            res.send(result);
+          });
+        }else
+          res.send({error:'cannot find logged user'});
     });
   });
   router.post('/assignTask',function(req, res,next) {
@@ -104,6 +115,7 @@ router.get('/tasks',function(req, res,next) {
 		User.getUserByEmail(req.session.email,function(user){
 			project.users=[];
 			if(user._id){
+        delete project._id;
 				project.users.push(user._id);
     			Project.addProject(project, function(result) {
      		 		res.send(result);
@@ -120,6 +132,16 @@ router.get('/tasks',function(req, res,next) {
     			});
     		}else
     		  res.send({error:'cannot find logged user'});
+    });
+  });
+  router.get('/getProjectName',function(req, res,next) {
+    User.getUserByEmail(req.session.email,function(user){
+      if(user._id){
+          Project.getProjectsName(user._id, function(result) {
+            res.send(result);
+          });
+        }else
+          res.send({error:'cannot find logged user'});
     });
   });
 /////////////////// End of Projects Routes

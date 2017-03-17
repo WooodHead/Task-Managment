@@ -30,12 +30,12 @@ mongoose.connect('mongodb://localhost/task_managment');
 app.use("/", express.static(__dirname + "/public/"));
 app.use('/', express.static(__dirname + '/node_modules/bootstrap/dist/'));
 app.use('/', express.static(__dirname + '/node_modules/font-awesome/'));
-app.use('/', express.static(__dirname + '/node_modules/jquery/'));
+app.use('/', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 app.use(cookieParser());
 app.use(session({secret: 'ssshhhhh',
-				resave: false,
-  				saveUninitialized: true})
+				          resave: false,
+  				        saveUninitialized: true})
 		);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
