@@ -65,6 +65,24 @@ schema.statics.addProject = function(project, callback) {
   });
 
 };
+schema.statics.editProject = function(project, callback) {
+  project.created_at=new Date();
+  project.updated_at=new Date();
+  var result = [];
+  // Query the db, using skip and limit to achieve page chunks
+  Project.create(project,function(err,docs){
+
+    // If everything is cool...
+    if(!err) {
+      result = docs;  // We got users
+    }
+
+    // Pass them back to the specified callback
+    callback(result);
+
+  });
+
+};
 
 // Return a Task model based upon the defined schema
 module.exports = Project = mongoose.model('Project', schema);

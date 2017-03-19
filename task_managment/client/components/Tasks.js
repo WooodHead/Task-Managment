@@ -9,6 +9,7 @@ module.exports=Tasks = React.createClass({
 			return {
 				projectsName:props.projectsName,
 				selectedProject:props.selectedProject,
+				selectedTasks:[],
 				tasks:props.tasks,
 				errors:props.errors,
 				task:{
@@ -118,6 +119,20 @@ module.exports=Tasks = React.createClass({
 	        $(ReactDOM.findDOMNode(this.refs.taskmodal)).modal();
 
 	    },
+	    handleSelection:function(val,flag){
+	        if(flag){
+	            this.setState({ 
+	                selectedTasks: this.state.selectedTasks.concat([val])
+	            });
+	        }else{
+	            var updatedIds=this.state.selectedTasks.map(function(id){
+	                return val!=id;
+	            });
+	            this.setState({ 
+	                selectedTasks: selectedTasks
+	            });
+	        }
+	    },
 	    changeTask:function(event) {
 	        const field = event.target.name;
 	         const task = this.state.task;
@@ -151,9 +166,9 @@ module.exports=Tasks = React.createClass({
                         <div className="row">
 	                        <div className="col-sm-6">
 	                            <div className="dt-buttons btn-group">
-	                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal}>New</button>
-	                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal}>Edit</button>                
-	                                <button className="btn btn-info btn-lg" >Delete</button>
+	                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal}  disabled={this.state.selectedTasks.length!=0}>New</button>
+	                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal} disabled={this.state.selectedTasks.length!=1}>Edit</button>                
+	                                <button className="btn btn-info btn-lg" disabled={this.state.selectedTasks.length==0}>Delete</button>
 	                            </div>
 	                        </div>
 	                        <div className="col-sm-6">
@@ -170,7 +185,7 @@ module.exports=Tasks = React.createClass({
                                All Tasks Of Selected Project
                             </div>
                             <div className="panel-body">
-                                <TaskTable tasks={this.state.tasks }/>
+                                <TaskTable tasks={this.state.tasks } handleSelection={this.handleSelection}/>
                             </div>
                         </div>
                     </div>
@@ -197,7 +212,7 @@ TaskTable = React.createClass({
 	   if(this.props.tasks){
 		   tasks=this.props.tasks.map (function(task) {
 				return (
-				<TaskObj key={ task._id } task={ task }></TaskObj>
+				<TaskObj key={ task._id } task={ task } handleSelection={this.handleSelection}></TaskObj>
 				)
 			});
 	   }
@@ -207,6 +222,7 @@ TaskTable = React.createClass({
                 <table className="table table-striped table-bordered table-hover">
                     <thead>
                         <tr role="row">
+                        	<th className="center-block"><input type="checkbox" /></th>
                             <th>Name</th>
                             <th>Description</th>
                             <th>Status</th>
@@ -224,11 +240,25 @@ TaskTable = React.createClass({
 });
 
 TaskObj = React.createClass({
-  
+  	clickCheckBox:function(e){
+        if (e.target.type !== 'checkbox') {
+        	var check=false;
+        	var clickVal=$(e.target).siblings().find('input#tid').val();
+        	console.log(clickVal);
+            $(e.target).siblings().find('input:checkbox:first').prop('checked', function( i, val ) {
+               check=!val;
+                return !val;
+            });
+            this.handleSelection(clickVal,check);
+        }
+        
+    },
     render: function(){
 
     return (
-       <tr className="" role="row">
+       <tr className="" role="row" onClick={this.clickCheckBox}>
+       		<td className="center-block"><input type="checkbox" /></td>
+       		<td ><input type="hidden" id="tid" value={this.props.task._id}/></td>
             <td className="">{ this.props.task.name }</td>
             <td className="">{ this.props.task.description }</td>
             <td className="">{ this.props.task.status}</td>

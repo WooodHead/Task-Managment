@@ -8,6 +8,7 @@ module.exports=Projects = React.createClass({
 		 props = props || this.props;
         return {projects:props.projects,
                 errors:props.errors,
+                selectedIds:[],
                 project:{
                     _id:'',
                     p_name:'',
@@ -50,6 +51,23 @@ module.exports=Projects = React.createClass({
     handleShowModal:function(){
         $(ReactDOM.findDOMNode(this.refs.projectmodal)).modal();
 
+    },
+    handleSelection:function(val,flag){
+        if(flag){
+            this.setState({ 
+                selectedIds: this.state.selectedIds.concat([val])
+            });
+        }else{
+            var updatedIds=this.state.selectedIds.map(function(id){
+                return val!=id;
+            });
+            this.setState({ 
+                selectedIds: updatedIds
+            });
+        }
+    },
+    handleDeletion:function(){
+        alert('Delete');
     },
     changeProject:function(event) {
         const field = event.target.name;
@@ -97,9 +115,9 @@ module.exports=Projects = React.createClass({
                         <div className="row">
                         <div className="col-sm-6">
                             <div className="dt-buttons btn-group">
-                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal}>New</button>
-                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal}>Edit</button>                
-                                <button className="btn btn-info btn-lg" >Delete</button>
+                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal} disabled={this.state.selectedIds.length!=0}>New</button>
+                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal} disabled={this.state.selectedIds.length!=1}>Edit</button>                
+                                <button className="btn btn-info btn-lg" onClick={this.handleDeletion} disabled={this.state.selectedIds.length==0}>Delete</button>
                             </div>
                         </div>
                         <div className="col-sm-6">
@@ -115,7 +133,7 @@ module.exports=Projects = React.createClass({
                                All Projects
                             </div>
                             <div className="panel-body">
-                                <ProjectsTable projects={this.state.projects }/>
+                                <ProjectsTable projects={this.state.projects } handleSelection={this.handleSelection}/>
                             </div>
                         </div>
                     </div>
@@ -131,11 +149,11 @@ module.exports=Projects = React.createClass({
 
 ProjectsTable= React.createClass({
     render: function(){
-       var projects =[];
+       var projects =[],self=this;
        if(this.props.projects){
            projects=this.props.projects.map (function(project) {
                 return (
-                <ProjectObj key={ project._id } project={ project }></ProjectObj>
+                <ProjectObj key={ project._id } project={ project } handleSelection={self.handleSelection}></ProjectObj>
                 )
             });
        }
@@ -145,6 +163,7 @@ ProjectsTable= React.createClass({
                 <table className="table table-striped table-bordered table-hover">
                     <thead>
                         <tr role="row">
+                            <th className="center-block"><input type="checkbox" /></th>
                             <th>Name</th>
                             <th>Description</th>
                             <th>Status</th>
@@ -161,11 +180,24 @@ ProjectsTable= React.createClass({
     }
 });
 ProjectObj = React.createClass({
-  
+    clickCheckBox:function(e){
+        if (e.target.type !== 'checkbox') {
+            var check=false;
+            var clickVal=$(e.target).siblings().find('input#tid').val();
+            $(e.target).siblings().find('input:checkbox:first').prop('checked', function( i, val ) {
+                check=!val;
+                return !val;
+            });
+            this.handleSelection(clickVal,check);
+        }
+
+    },
     render: function(){
 
     return (
-        <tr className="" role="row">
+        <tr className="" role="row" onClick={this.clickCheckBox}>
+            <td className="center-block"><input type="checkbox" /></td>
+            <td style={visibility:hidden}><input type="hidden" id="pid" value={this.props.project._id}/></td>
             <td className="">{ this.props.project.p_name }</td>
             <td className="">{ this.props.project.description }</td>
             <td className="">{ this.props.project.status}</td>
