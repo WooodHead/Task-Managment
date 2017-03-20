@@ -9,17 +9,10 @@ module.exports=Projects = React.createClass({
         return {projects:props.projects,
                 errors:props.errors,
                 selectedIds:[],
-                project:{
-                    _id:'',
-                    p_name:'',
-                    description:'',
-                    status:'',
-                    estimation:''
-                }
+                project:{}
                 };
 	},
-    componentDidMount: function(){
-
+    loadProjects:function(){
         var self=this;
         const xhr = new XMLHttpRequest();
         xhr.open('get', '/api/getProjectByUser');
@@ -45,10 +38,22 @@ module.exports=Projects = React.createClass({
         });
         xhr.send();
     },
+    componentDidMount: function(){
+        this.loadProjects();
+    },
     handleHideModal:function(){
         this.setState({view: {showModal: false}})
     },
     handleShowModal:function(){
+        if(this.state.selectedIds.length==1){
+            var self=this;
+            var result = this.state.projects.filter(function( obj ) {
+              return obj._id ==self.state.selectedIds[0];
+            });
+            this.setState({
+                project:result[0]
+            });
+        }
         $(ReactDOM.findDOMNode(this.refs.projectmodal)).modal();
 
     },
@@ -58,16 +63,31 @@ module.exports=Projects = React.createClass({
                 selectedIds: this.state.selectedIds.concat([val])
             });
         }else{
-            var updatedIds=this.state.selectedIds.map(function(id){
-                return val!=id;
-            });
+            var updatedIds=this.state.selectedIds;
+            var index=updatedIds.indexOf(val);
+            if(index>-1){
+                updatedIds.splice(index,1);
+            }
             this.setState({ 
                 selectedIds: updatedIds
             });
         }
     },
     handleDeletion:function(){
-        alert('Delete');
+        var request = new XMLHttpRequest(), self = this;
+            request.open("DELETE", "/api/deleteProjects", true);
+            request.setRequestHeader("Content-type", "application/json");
+            request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
+            request.onreadystatechange = function() {//Call a function when the state changes.
+                if(request.readyState == 4 && request.status == 200) {
+                     console.log(request);
+                    self.loadProjects();
+                    self.setState({
+                        selectedIds:[]
+                    });
+                }
+            }
+            request.send(JSON.stringify({projectids:self.state.selectedIds}));
     },
     changeProject:function(event) {
         const field = event.target.name;
@@ -75,37 +95,48 @@ module.exports=Projects = React.createClass({
         project[field] = event.target.value;
 
         this.setState({project:project});
-  },
-  processForm:function(event) {
-    // prevent default action. in this case, action is the form submission event
-    event.preventDefault();
+      },
+      closeDialog:function(){
+         $(ReactDOM.findDOMNode(this.refs.projectmodal)).find("input,textarea,select").val('').end()
+                .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+                this.setState({
+                    project:''
+                });
+      },
+      processForm:function(event) {
+        // prevent default action. in this case, action is the form submission event
+        event.preventDefault();
 
-   /* console.log('name:', this.state.user.name);
-    console.log('email:', this.state.user.email);
-    console.log('password:', this.state.user.password);*/
-    // create a string for an HTTP body message
-        var request = new XMLHttpRequest(), self = this;
-        request.open("POST", "/api/addProject", true);
-        request.setRequestHeader("Content-type", "application/json");
-        request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
-        request.onreadystatechange = function() {//Call a function when the state changes.
-            if(request.readyState == 4 && request.status == 200) {
-            var updated =[];
-            if(self.state.projects)
-                updated=self.state.projects;
-      // Push them onto the end of the current tweets array
-            if(request.responseText){
-                updated.push(JSON.parse(request.responseText));
-            }
-            self.setState({projects: updated});
-            }
-            $(ReactDOM.findDOMNode(self.refs.projectmodal)).modal('hide');
-            $(ReactDOM.findDOMNode(self.refs.projectmodal)).find("input,textarea,select").val('').end()
-            .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
-         }
-        request.send(JSON.stringify({project:self.state.project}));
+        // create a string for an HTTP body message
+            var request = new XMLHttpRequest(), self = this;
+            request.open("POST", "/api/addProject", true);
+            request.setRequestHeader("Content-type", "application/json");
+            request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
+            request.onreadystatechange = function() {//Call a function when the state changes.
+                if(request.readyState == 4 && request.status == 200) {
+                var updated =[];
+                if(self.state.projects)
+                    updated=self.state.projects;
+          // Push them onto the end of the current tweets array
+                if(request.responseText){
+                    if(!self.state.project._id)
+                        updated.push(JSON.parse(request.responseText));
+                    else{
+                        updated = updated.filter(function( obj ) {
+                            return obj._id !== self.state.project._id;
+                        });
+                        updated.push(JSON.parse(request.responseText));
+                    }
+                }
+                self.setState({projects: updated,project:{},selectedIds:[]});
+                }
+                $(ReactDOM.findDOMNode(self.refs.projectmodal)).modal('hide');
+                $(ReactDOM.findDOMNode(self.refs.projectmodal)).find("input,textarea,select").val('').end()
+                .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+             }
+            request.send(JSON.stringify({project:self.state.project}));
 
-  },
+      },
     render:function(){
 		return(
             <div >
@@ -115,9 +146,9 @@ module.exports=Projects = React.createClass({
                         <div className="row">
                         <div className="col-sm-6">
                             <div className="dt-buttons btn-group">
-                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal} disabled={this.state.selectedIds.length!=0}>New</button>
-                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal} disabled={this.state.selectedIds.length!=1}>Edit</button>                
-                                <button className="btn btn-info btn-lg" onClick={this.handleDeletion} disabled={this.state.selectedIds.length==0}>Delete</button>
+                                <button className={this.state.selectedIds.length==0?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleShowModal} disabled={this.state.selectedIds.length!=0}>New</button>
+                                <button className={this.state.selectedIds.length==1?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleShowModal} disabled={this.state.selectedIds.length!=1}>Edit</button>                
+                                <button className={this.state.selectedIds.length!=0?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleDeletion} disabled={this.state.selectedIds.length==0}>Delete</button>
                             </div>
                         </div>
                         <div className="col-sm-6">
@@ -139,7 +170,7 @@ module.exports=Projects = React.createClass({
                     </div>
                 </div>
                 <div className="row col-lg-12">
-                <ProjectDialog ref='projectmodal' errors={this.state.errors} onChangeInput={this.changeProject} onSubmitForm={this.processForm}/>
+                <ProjectDialog ref='projectmodal' errors={this.state.errors} onChangeInput={this.changeProject} onSubmitForm={this.processForm} onCloseDialog={this.closeDialog} project={this.state.project}/>
                 </div>
             </div>            
 		)
@@ -153,7 +184,7 @@ ProjectsTable= React.createClass({
        if(this.props.projects){
            projects=this.props.projects.map (function(project) {
                 return (
-                <ProjectObj key={ project._id } project={ project } handleSelection={self.handleSelection}></ProjectObj>
+                <ProjectObj key={ project._id } project={ project } handleSelection={self.props.handleSelection}></ProjectObj>
                 )
             });
        }
@@ -181,15 +212,16 @@ ProjectsTable= React.createClass({
 });
 ProjectObj = React.createClass({
     clickCheckBox:function(e){
-        if (e.target.type !== 'checkbox') {
+        // console.log(e.target.type);
+        // if (e.target.type !== 'checkbox') {
             var check=false;
-            var clickVal=$(e.target).siblings().find('input#tid').val();
+            var clickVal=$(e.target).siblings().find('input#pid').val();
             $(e.target).siblings().find('input:checkbox:first').prop('checked', function( i, val ) {
                 check=!val;
                 return !val;
             });
-            this.handleSelection(clickVal,check);
-        }
+            this.props.handleSelection(clickVal,check);
+       // }
 
     },
     render: function(){
@@ -197,7 +229,7 @@ ProjectObj = React.createClass({
     return (
         <tr className="" role="row" onClick={this.clickCheckBox}>
             <td className="center-block"><input type="checkbox" /></td>
-            <td style={visibility:hidden}><input type="hidden" id="pid" value={this.props.project._id}/></td>
+            <td hidden><input type="hidden" id="pid" value={this.props.project._id}/></td>
             <td className="">{ this.props.project.p_name }</td>
             <td className="">{ this.props.project.description }</td>
             <td className="">{ this.props.project.status}</td>
@@ -215,8 +247,8 @@ ProjectDialog=React.createClass({
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h4 className="modal-title">Add Project</h4>
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
+                  <h4 className="modal-title">{this.props.project._id?'Edit Project':'Add Project'}</h4>
                 </div>
                 <div className="modal-body">
                  <form className="form-horizontal" onSubmit={this.props.onSubmitForm}>
@@ -225,28 +257,28 @@ ProjectDialog=React.createClass({
                         <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Name</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="p_name" placeholder="Name" onChange={this.props.onChangeInput}/>
+                                <input type="text" className="form-control" name="p_name" placeholder="Name" value={this.props.project.p_name} onChange={this.props.onChangeInput} disabled={this.props.project._id}/>
                             </div>
                          </div>
 
                            <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Description</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="description" placeholder="Description" onChange={this.props.onChangeInput}/>
+                                <input type="text" className="form-control" name="description" placeholder="Description" value={this.props.project.description} onChange={this.props.onChangeInput}/>
                             </div>
                          </div>
                          
                           <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputStatus">Status</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="status" placeholder="Status" onChange={this.props.onChangeInput}/>
+                                <input type="text" className="form-control" name="status" placeholder="Status" value={this.props.project.status} onChange={this.props.onChangeInput}/>
                             </div>
                          </div>
 
                           <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputEstimation">Estimation</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="estimation" placeholder="Estimation" onChange={this.props.onChangeInput}/>
+                                <input type="text" className="form-control" name="estimation" placeholder="Estimation" value={this.props.project.estimation} onChange={this.props.onChangeInput}/>
                             </div>
                          </div>
 
@@ -254,7 +286,7 @@ ProjectDialog=React.createClass({
                     </form>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.props.onCloseDialog}>Close</button>
                   <button type="button" className="btn btn-primary" onClick={this.props.onSubmitForm}>Save changes</button>
                 </div>
               </div>

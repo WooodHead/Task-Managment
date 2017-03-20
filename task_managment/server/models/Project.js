@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 
 // Create a new schema for our tweet data
 var schema = new mongoose.Schema({
-  p_name     : String,
+  p_name     : { type: String, index: { unique: true }},
   description: String,
   estimation : String,
   status     :String,
@@ -65,12 +65,27 @@ schema.statics.addProject = function(project, callback) {
   });
 
 };
-schema.statics.editProject = function(project, callback) {
-  project.created_at=new Date();
+schema.statics.editProject = function(id,project, callback) {
   project.updated_at=new Date();
   var result = [];
   // Query the db, using skip and limit to achieve page chunks
-  Project.create(project,function(err,docs){
+  Project.findOneAndUpdate({ "_id": id }, { "$set":{description:project.description,status:project.status,estimation:project.estimation,updated_at:project.updated_at}},{new: true},function(err,docs){
+
+    // If everything is cool...
+    if(!err) {
+      result = docs;  // We got users
+    }
+
+    // Pass them back to the specified callback
+    callback(result);
+
+  });
+
+};
+schema.statics.deleteProjects = function(projects, callback) {
+
+  // Query the db, using skip and limit to achieve page chunks
+  Project.remove({_id:{$in:projects}},function(err,docs){
 
     // If everything is cool...
     if(!err) {

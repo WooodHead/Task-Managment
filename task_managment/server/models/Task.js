@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 
 // Create a new schema for our tweet data
 var schema = new mongoose.Schema({
-    name        : String,
+    name        : { type: String, index: { unique: true }},
     description : String,
     status      : String,
     estimation  : String,
@@ -63,6 +63,39 @@ var tasks = [];
 
     // Pass them back to the specified callback
     callback(tasks);
+
+  });
+
+};
+schema.statics.editTask = function(id,task, callback) {
+    task.updated_at=new Date();
+  // Query the db, using skip and limit to achieve page chunks
+  var result;
+  Task.findOneAndUpdate({ "_id": id }, { "$set":{description:task.description,status:task.status,estimation:task.estimation,updated_at:task.updated_at}},{new: true},function(err,docs){
+
+    // If everything is cool...
+    if(!err) {
+      result = docs;  // We got users
+    }
+
+    // Pass them back to the specified callback
+    callback(result);
+
+  });
+
+};
+schema.statics.deleteTasks = function(tasks, callback) {
+
+  // Query the db, using skip and limit to achieve page chunks
+  Task.remove({_id:{$in:tasks}},function(err,docs){
+
+    // If everything is cool...
+    if(!err) {
+      result = docs;  // We got users
+    }
+
+    // Pass them back to the specified callback
+    callback(result);
 
   });
 

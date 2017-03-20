@@ -12,12 +12,8 @@ module.exports=Tasks = React.createClass({
 				selectedTasks:[],
 				tasks:props.tasks,
 				errors:props.errors,
-				task:{
-					name:'',
-					description:'',
-					status:'',
-					estimation:''
-				}
+				task:{},
+				comment:{details:''}
 			};
 		},
 		componentDidMount: function(){
@@ -87,6 +83,23 @@ module.exports=Tasks = React.createClass({
 	        });
 	        xhr.send();
 	    },
+	    handleDeletion:function(){
+	        var request = new XMLHttpRequest(), self = this;
+	            request.open("DELETE", "/api/deleteTasks", true);
+	            request.setRequestHeader("Content-type", "application/json");
+	            request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
+	            request.onreadystatechange = function() {//Call a function when the state changes.
+	                if(request.readyState == 4 && request.status == 200) {
+	                	 console.log(request);
+	                    self.loadTasks(self.state.selectedProject);
+	                    self.setState({
+	                        selectedTasks:[]
+	                    });
+	                }
+	            }
+	            request.send(JSON.stringify({taskids:self.state.selectedTasks}));
+
+	    },
 		AddTask: function(e){
 		
 			e.preventDefault();
@@ -101,45 +114,98 @@ module.exports=Tasks = React.createClass({
 				 	updated=self.state.tasks;
 	      		// Push them onto the end of the current tweets array
 				if(request.responseText){
-					updated.push(JSON.parse(request.responseText));
+					if(!self.state.task._id)
+						updated.push(JSON.parse(request.responseText));
+                    else{
+                        updated = updated.filter(function( obj ) {
+                            return obj._id !== self.state.task._id;
+                        });
+						updated.push(JSON.parse(request.responseText));
+                    }
 				}
-				self.setState({tasks: updated});
+				self.setState({tasks: updated,task:{},selectedTasks:[]});
 				}
 				  $(ReactDOM.findDOMNode(self.refs.taskmodal)).modal('hide');
 	            $(ReactDOM.findDOMNode(self.refs.taskmodal)).find("input,textarea,select").val('').end()
 	            .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
 			}
-			self.state.task.project_id=self.state.selectedProject;
+			if(!self.state.task._id)
+				self.state.task.project_id=self.state.selectedProject;
 			request.send(JSON.stringify({task:self.state.task}));
 		},
 		handleHideModal:function(){
 	        this.setState({view: {showModal: false}})
 	    },
 	    handleShowModal:function(){
+	    	if(this.state.selectedTasks.length==1){
+	            var self=this;
+	            var result = this.state.tasks.filter(function( obj ) {
+	              return obj._id ==self.state.selectedTasks[0];
+	            });
+	            this.setState({
+	                task:result[0]
+	            });
+	        }
 	        $(ReactDOM.findDOMNode(this.refs.taskmodal)).modal();
 
 	    },
+	    closeDialog:function(){
+	         $(ReactDOM.findDOMNode(this.refs.taskmodal)).find("input,textarea,select").val('').end()
+	                .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+	                this.setState({
+	                    task:''
+	                });
+	     },
 	    handleSelection:function(val,flag){
 	        if(flag){
 	            this.setState({ 
 	                selectedTasks: this.state.selectedTasks.concat([val])
 	            });
 	        }else{
-	            var updatedIds=this.state.selectedTasks.map(function(id){
-	                return val!=id;
-	            });
+	            var updatedIds=this.state.selectedTasks;
+	            var index=updatedIds.indexOf(val);
+	            if(index>-1){
+	                updatedIds.splice(index,1);
+	            }
 	            this.setState({ 
-	                selectedTasks: selectedTasks
+	                selectedTasks: updatedIds
 	            });
-	        }
+		        }
 	    },
 	    changeTask:function(event) {
 	        const field = event.target.name;
 	         const task = this.state.task;
 	        task[field] = event.target.value;
 	        this.setState({task:task});
-	  },
+	  	},
+	  	///////
+	  	AddComment:function(){
+			e.preventDefault();
+			var request = new XMLHttpRequest(), self = this;
+			request.open("POST", "/api/addComment", true);
+			request.setRequestHeader("Content-type", "application/json");
+			request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
+			request.onreadystatechange = function() {//Call a function when the state changes.
+				if(request.readyState == 4 && request.status == 200) {
 
+				}
+				  $(ReactDOM.findDOMNode(self.refs.cmodal)).modal('hide');
+	            $(ReactDOM.findDOMNode(self.refs.cmodal)).find("input,textarea,select").val('').end()
+	            .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+			}
+			request.send(JSON.stringify({task:self.state.comment}));
+		},
+	 	showCModal:function(e){
+	 		e.cancelBubble=true;
+	 		console.log(e);
+	    	$(ReactDOM.findDOMNode(this.refs.cmodal)).modal();
+	    	return false;
+
+		 },
+	 	changeComment:function(){
+
+		 },
+	  	//////
      render:function(){
      	var projectsName=[];
      	if(this.state.projectsName){
@@ -166,9 +232,9 @@ module.exports=Tasks = React.createClass({
                         <div className="row">
 	                        <div className="col-sm-6">
 	                            <div className="dt-buttons btn-group">
-	                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal}  disabled={this.state.selectedTasks.length!=0}>New</button>
-	                                <button className="btn btn-info btn-lg" onClick={this.handleShowModal} disabled={this.state.selectedTasks.length!=1}>Edit</button>                
-	                                <button className="btn btn-info btn-lg" disabled={this.state.selectedTasks.length==0}>Delete</button>
+	                                <button className={this.state.selectedTasks.length==0?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleShowModal}  disabled={this.state.selectedTasks.length!=0}>New</button>
+	                                <button className={this.state.selectedTasks.length==1?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleShowModal} disabled={this.state.selectedTasks.length!=1}>Edit</button>                
+	                                <button className={this.state.selectedTasks.length!=0?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleDeletion} disabled={this.state.selectedTasks.length==0}>Delete</button>
 	                            </div>
 	                        </div>
 	                        <div className="col-sm-6">
@@ -185,13 +251,16 @@ module.exports=Tasks = React.createClass({
                                All Tasks Of Selected Project
                             </div>
                             <div className="panel-body">
-                                <TaskTable tasks={this.state.tasks } handleSelection={this.handleSelection}/>
+                                <TaskTable tasks={this.state.tasks} handleSelection={this.handleSelection} handleComment={this.showCModal}/>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="row col-lg-12">
-                	<TaskDialog onSubmitTask={this.AddTask} task={this.state.task} ref='taskmodal' onChangeInput={this.changeTask}></TaskDialog>
+                	<TaskDialog onSubmitTask={this.AddTask} task={this.state.task} ref='taskmodal' onChangeInput={this.changeTask} onCloseDialog={this.closeDialog}></TaskDialog>
+            	</div>
+            	<div className="row col-lg-12">
+                	<ComentDialog onSubmitComment={this.AddComment} comment={this.state.comment} ref='cmodal' onChangeInput={this.changeComment} ></ComentDialog>
             	</div>
         </div>
 		)
@@ -208,11 +277,11 @@ Options=React.createClass({
 });
 TaskTable = React.createClass({
     render: function(){
-       var tasks =[];
+       var tasks =[],self=this;
 	   if(this.props.tasks){
 		   tasks=this.props.tasks.map (function(task) {
 				return (
-				<TaskObj key={ task._id } task={ task } handleSelection={this.handleSelection}></TaskObj>
+				<TaskObj key={ task._id } task={ task } handleSelection={self.props.handleSelection} handleComment={self.props.handleComment}></TaskObj>
 				)
 			});
 	   }
@@ -228,6 +297,7 @@ TaskTable = React.createClass({
                             <th>Status</th>
                             <th>Estimation</th>
                             <th>Updated_at</th>
+                            <th>Comments</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -235,6 +305,7 @@ TaskTable = React.createClass({
                     </tbody>
                 </table>
             </div>
+            
 		)
 	}
 });
@@ -244,27 +315,26 @@ TaskObj = React.createClass({
         if (e.target.type !== 'checkbox') {
         	var check=false;
         	var clickVal=$(e.target).siblings().find('input#tid').val();
-        	console.log(clickVal);
             $(e.target).siblings().find('input:checkbox:first').prop('checked', function( i, val ) {
                check=!val;
                 return !val;
             });
-            this.handleSelection(clickVal,check);
+            this.props.handleSelection(clickVal,check);
         }
-        
+        console.log(e);
     },
     render: function(){
 
     return (
        <tr className="" role="row" onClick={this.clickCheckBox}>
        		<td className="center-block"><input type="checkbox" /></td>
-       		<td ><input type="hidden" id="tid" value={this.props.task._id}/></td>
+       		<td hidden><input type="hidden" id="tid" value={this.props.task._id}/></td>
             <td className="">{ this.props.task.name }</td>
             <td className="">{ this.props.task.description }</td>
             <td className="">{ this.props.task.status}</td>
             <td className="">{ this.props.task.estimation}</td>
             <td className="">{ this.props.task.updated_at}</td>
-
+            <td className="" onClick='event.stopPropagation();return false;'><button type="button" className="btn btn-primary" onClick={this.props.handleComment}>Add Comment</button></td>
         </tr>
 	)
 	}
@@ -276,8 +346,8 @@ TaskDialog=React.createClass({
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h4 className="modal-title">Add Task</h4>
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
+                  <h4 className="modal-title">{this.props.task._id?'Edit Task':'Add Task'}</h4>
                 </div>
                 <div className="modal-body">
                  <form className="form-horizontal" onSubmit={this.props.onSubmitTask}>
@@ -286,28 +356,69 @@ TaskDialog=React.createClass({
                         <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Name</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="name" placeholder="Name" onChange={this.props.onChangeInput}/>
+                                <input type="text" className="form-control" name="name" placeholder="Name" value={this.props.task.name} onChange={this.props.onChangeInput} disabled={this.props.task._id}/>
                             </div>
                          </div>
 
                            <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Description</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="description" placeholder="Description" onChange={this.props.onChangeInput}/>
+                                <input type="text" className="form-control" name="description" placeholder="Description" value={this.props.task.description} onChange={this.props.onChangeInput}/>
                             </div>
                          </div>
                          
                           <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputStatus">Status</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="status" placeholder="Status" onChange={this.props.onChangeInput}/>
+                                <input type="text" className="form-control" name="status" placeholder="Status" value={this.props.task.status} onChange={this.props.onChangeInput}/>
                             </div>
                          </div>
 
                           <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputEstimation">Estimation</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="estimation" placeholder="Estimation" onChange={this.props.onChangeInput}/>
+                                <input type="text" className="form-control" name="estimation" placeholder="Estimation" value={this.props.task.estimation} onChange={this.props.onChangeInput}/>
+                            </div>
+                         </div>
+
+                       </fieldset>
+                    </form>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.props.onCloseDialog}>Close</button>
+                  <button type="button" className="btn btn-primary" onClick={this.props.onSubmitTask}>Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+    }
+});
+ComentDialog=React.createClass({
+    render:function(){
+        return (
+            <div className="modal fade">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" ><span aria-hidden="true">&times;</span></button>
+                  <h4 className="modal-title">Add Comment</h4>
+                </div>
+                <div className="modal-body">
+                 <form className="form-horizontal" onSubmit={this.props.onSubmitComment}>
+                    <fieldset>
+
+                        <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Details</label>
+                            <div className="col-sm-10">
+                                <input type="text" className="form-control" name="details" placeholder="Details" value={this.props.comment.details} onChange={this.props.onChangeInput} />
+                            </div>
+                         </div>
+
+                           <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Select File</label>
+                            <div className="col-sm-10">
+                                <input type="file" className="form-control" name="file" onChange={this.props.onChangeInput}/>
                             </div>
                          </div>
 
@@ -316,7 +427,7 @@ TaskDialog=React.createClass({
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-                  <button type="button" className="btn btn-primary" onClick={this.props.onSubmitTask}>Save changes</button>
+                  <button type="button" className="btn btn-primary" onClick={this.props.onSubmitComment}>Save comment</button>
                 </div>
               </div>
             </div>

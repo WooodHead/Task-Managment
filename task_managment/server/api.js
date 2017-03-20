@@ -30,18 +30,25 @@ router.get('/tasks',function(req, res,next) {
   });
 
   router.post('/addTask',function(req, res,next) {
-	var task=req.body.task;
-	User.getUserByEmail(req.session.email,function(user){
-		if(user._id){
-			task.user_id=user._id;
-    		Task.addTask(task, function(tasks) {
+  	var task=req.body.task;
+    if(!task._id){
+    	User.getUserByEmail(req.session.email,function(user){
+    		if(user._id){
+    			task.user_id=user._id;
+        		Task.addTask(task, function(tasks) {
 
-      			res.send(tasks);
-    		});
-    	}else{
-    		res.send({error:'cannot find logged user'});
-    	}
-    });
+          			res.send(tasks);
+        		});
+        	}else{
+        		res.send({error:'cannot find logged user'});
+        	}
+        });
+    }else{
+      var id=(' ' + task._id).slice(1);
+      Task.editTask(id,task, function(task) {
+           res.send(task);
+      });
+    }
   });
   router.get('/getTasksByProject',function(req, res,next) {
       var queryParams={project_id:req.query.projectid};
@@ -76,6 +83,11 @@ router.get('/tasks',function(req, res,next) {
     User.assignTaskToUser(assignment, function(user) {
 		res.send(user);
     });
+  });
+  router.delete('/deleteTasks',function(req, res,next) {
+        Task.deleteTasks(req.body.taskids, function(result) {
+            res.send(result);
+          });
   });
   /////////// End of Tasks
   /////////// Comments Routes
@@ -112,17 +124,24 @@ router.get('/tasks',function(req, res,next) {
   /////////// handle Projects routes
 	router.post('/addProject',function(req, res,next) {
 		var project=req.body.project;
-		User.getUserByEmail(req.session.email,function(user){
-			project.users=[];
-			if(user._id){
-        delete project._id;
-				project.users.push(user._id);
-    			Project.addProject(project, function(result) {
-     		 		res.send(result);
-    			});
-    		}else
-    		  res.send({error:'cannot find logged user'});
-    });
+    if(!project._id){
+  		User.getUserByEmail(req.session.email,function(user){
+  			project.users=[];
+  			if(user._id){
+          delete project._id;
+  				project.users.push(user._id);
+      			Project.addProject(project, function(result) {
+       		 		res.send(result);
+      			});
+      		}else
+      		  res.send({error:'cannot find logged user'});
+      });
+    }else{
+      var id=(' ' + project._id).slice(1);
+      Project.editProject(id,project, function(project) {
+           res.send(project);
+      });
+    }
   });
 	router.get('/getProjectByUser',function(req, res,next) {
 		User.getUserByEmail(req.session.email,function(user){
@@ -143,6 +162,11 @@ router.get('/tasks',function(req, res,next) {
         }else
           res.send({error:'cannot find logged user'});
     });
+  });
+  router.delete('/deleteProjects',function(req, res,next) {
+        Project.deleteProjects(req.body.projectids, function(result) {
+            res.send(result);
+          });
   });
 /////////////////// End of Projects Routes
 module.exports = router;
