@@ -234,7 +234,7 @@ ProjectObj = React.createClass({
             <td className="">{ this.props.project.description }</td>
             <td className="">{ this.props.project.status}</td>
             <td className="">{ this.props.project.estimation}</td>
-            <td className="">{ this.props.project.updated_at}</td>
+            <td className="">{ new Date(this.props.project.updated_at).toDateString()}</td>
 
         </tr>
     )

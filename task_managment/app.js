@@ -1,7 +1,6 @@
-/** @jsx React.DOM */
 
 var React = require('react');
-var	ReactDOM = require('react-dom');
+var ReactDOM = require('react-dom');
 var Router=require('react-router').Router,
  Route=require('react-router').Route,
  Link=require('react-router').Link,

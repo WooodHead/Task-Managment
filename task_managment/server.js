@@ -1,12 +1,12 @@
 // Require our dependencies
 var express = require('express'),
-  exphbs = require('express-handlebars'),
-  http = require('http'),
-  mongoose = require('mongoose'),
-  routes = require('./server/routes'),
-  api = require('./server/api'),
-  passport=require('passport'),
-  authRoutes = require('./server/auth');
+    exphbs = require('express-handlebars'),
+    http = require('http'),
+    mongoose = require('mongoose'),
+    routes = require('./server/routes'),
+    api = require('./server/api'),
+    passport=require('passport'),
+    authRoutes = require('./server/auth');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
@@ -21,7 +21,8 @@ app.set('view engine', 'handlebars');
 
 // Disable etag headers on responses
 app.disable('etag');
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // Connect to our mongo database
 mongoose.connect('mongodb://localhost/task_managment');
@@ -37,8 +38,7 @@ app.use(session({secret: 'ssshhhhh',
 				          resave: false,
   				        saveUninitialized: true})
 		);
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+
 
 // pass the passport middleware
 app.use(passport.initialize());

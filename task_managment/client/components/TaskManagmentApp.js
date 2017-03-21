@@ -1,4 +1,3 @@
-/** @jsx React.DOM */
 
 var React = require('react');
 var Auth =require('./modules/Auth1');

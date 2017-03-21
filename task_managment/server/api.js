@@ -9,7 +9,8 @@ var	JSX = require('node-jsx').install(),
 	Attachment = require('./models/Attachment'),
   	User = require('./models/User');
 var router = new express.Router();
-
+var multer  = require('multer')
+var upload = multer({ dest: 'uploads/' })
  /////////// handle Tasks routes
 router.get('/tasks',function(req, res,next) {
 	  Task.getTasksByProjectsAndUser(0,function(tasks){
@@ -91,18 +92,19 @@ router.get('/tasks',function(req, res,next) {
   });
   /////////// End of Tasks
   /////////// Comments Routes
-	router.post('/addComment',function(req, res,next) {
-		var comment=req.body.comment;
-		User.getUserByEmail(req.session.email,function(user){
-			if(user._id){
-				comment.user_id=user._id;
-    			Comment.addComment(comment, function(result) {
-      				res.send(result);
-    			});
-    		}else{
-    			res.send({error:'cannot find logged user'});
-    		}
-   		 });
+	router.post('/addComment',upload.single('attachment'),function(req, res,next) {
+  		  var comment=req.body.comment;
+        var file=req.file;
+    		User.getUserByEmail(req.session.email,function(user){
+    			if(user._id){
+    				comment.user_id=user._id;
+        			Comment.addComment(comment, function(result) {
+          				res.send(result);
+        			});
+        		}else{
+        			res.send({error:'cannot find logged user'});
+        		}
+       		 });
   });
 	router.get('/getCommentByTask',function(req, res,next) {
   		var taskid=req.query.taskid;

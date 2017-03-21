@@ -13,7 +13,7 @@ module.exports=Tasks = React.createClass({
 				tasks:props.tasks,
 				errors:props.errors,
 				task:{},
-				comment:{details:''}
+				comment:{}
 			};
 		},
 		componentDidMount: function(){
@@ -30,7 +30,6 @@ module.exports=Tasks = React.createClass({
 	              projectsName: projectsName
 	            });
 	            if(projectsName&&projectsName[0]){
-	            	console.log(projectsName[0]._id);
 	            	 self.setState({
 	             		 selectedProject: projectsName[0]._id
 	            	});
@@ -173,37 +172,59 @@ module.exports=Tasks = React.createClass({
 		        }
 	    },
 	    changeTask:function(event) {
-	        const field = event.target.name;
+	         const field = event.target.name;
 	         const task = this.state.task;
 	        task[field] = event.target.value;
 	        this.setState({task:task});
 	  	},
 	  	///////
-	  	AddComment:function(){
+	  	AddComment:function(e){
 			e.preventDefault();
 			var request = new XMLHttpRequest(), self = this;
+			var file = $("#attachment")[0].files[0];
+			var FD = new FormData();
+			FD.append("comment", "comment");
+			console.log(file);
+			FD.append("attachment", file);
+			console.log(FD);
 			request.open("POST", "/api/addComment", true);
-			request.setRequestHeader("Content-type", "application/json");
+			request.setRequestHeader("Content-type", "multipart/form-data; boundary=---------------------------7da24f2e50046");
 			request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
 			request.onreadystatechange = function() {//Call a function when the state changes.
 				if(request.readyState == 4 && request.status == 200) {
-
+					self.setState({
+			 			comment:{}
+			 		});
+			 		self.hideCModal();
 				}
-				  $(ReactDOM.findDOMNode(self.refs.cmodal)).modal('hide');
-	            $(ReactDOM.findDOMNode(self.refs.cmodal)).find("input,textarea,select").val('').end()
-	            .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+				
 			}
-			request.send(JSON.stringify({task:self.state.comment}));
+			//request.send(JSON.stringify({comment:self.state.comment,myfile:file}));
+			request.send(FD);
 		},
 	 	showCModal:function(e){
-	 		e.cancelBubble=true;
-	 		console.log(e);
-	    	$(ReactDOM.findDOMNode(this.refs.cmodal)).modal();
+	 		e.stopPropagation();
+	 		if(e.target.type=='submit'){
+	 			console.log($(e.target).parent().siblings().find('input#tid').val());
+		 		var taskid=$(e.target).parent().siblings().find('input#tid').val();
+		 		this.setState({
+		 			comment:{task_id:taskid}
+		 		});
+		    	$(ReactDOM.findDOMNode(this.refs.cmodal)).modal();
+		    }
 	    	return false;
 
 		 },
-	 	changeComment:function(){
-
+		 hideCModal:function(){
+		 	$(ReactDOM.findDOMNode(this.refs.cmodal)).modal('hide');
+		    $(ReactDOM.findDOMNode(this.refs.cmodal)).find("input,textarea,select").val('').end()
+		     .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+		 },
+	 	changeComment:function(event){
+	 		const field = event.target.name;
+	        const comment = this.state.comment;
+	        comment[field] = event.target.value;
+	        this.setState({comment:comment});
 		 },
 	  	//////
      render:function(){
@@ -260,7 +281,7 @@ module.exports=Tasks = React.createClass({
                 	<TaskDialog onSubmitTask={this.AddTask} task={this.state.task} ref='taskmodal' onChangeInput={this.changeTask} onCloseDialog={this.closeDialog}></TaskDialog>
             	</div>
             	<div className="row col-lg-12">
-                	<ComentDialog onSubmitComment={this.AddComment} comment={this.state.comment} ref='cmodal' onChangeInput={this.changeComment} ></ComentDialog>
+                	<ComentDialog onSubmitComment={this.AddComment} comment={this.state.comment} ref='cmodal' onChangeInput={this.changeComment} onCloseDialog={this.hideCModal}></ComentDialog>
             	</div>
         </div>
 		)
@@ -333,8 +354,8 @@ TaskObj = React.createClass({
             <td className="">{ this.props.task.description }</td>
             <td className="">{ this.props.task.status}</td>
             <td className="">{ this.props.task.estimation}</td>
-            <td className="">{ this.props.task.updated_at}</td>
-            <td className="" onClick='event.stopPropagation();return false;'><button type="button" className="btn btn-primary" onClick={this.props.handleComment}>Add Comment</button></td>
+            <td className="">{ new Date(this.props.task.updated_at).toDateString()}</td>
+            <td className="" onClick={this.props.handleComment}><button className="btn btn-primary">Add Comment</button></td>
         </tr>
 	)
 	}
@@ -401,33 +422,34 @@ ComentDialog=React.createClass({
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" ><span aria-hidden="true">&times;</span></button>
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
                   <h4 className="modal-title">Add Comment</h4>
                 </div>
                 <div className="modal-body">
-                 <form className="form-horizontal" onSubmit={this.props.onSubmitComment}>
-                    <fieldset>
-
+                 <form className="form-horizontal" onSubmit={this.props.onSubmitComment} id="commentForm" enctype="multipart/form-data">
+                    	<fieldset>
+                    	 <div className="form-group">
+                    		<input type="hidden" id="tid" name="tid" value={this.props.comment.task_id}/>
+                    		</div>
                         <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Details</label>
                             <div className="col-sm-10">
-                                <input type="text" className="form-control" name="details" placeholder="Details" value={this.props.comment.details} onChange={this.props.onChangeInput} />
+                                <textarea rows="3" className="form-control" name="details" placeholder="Details" value={this.props.comment.details} onChange={this.props.onChangeInput} />
                             </div>
                          </div>
 
                            <div className="form-group">
                             <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Select File</label>
                             <div className="col-sm-10">
-                                <input type="file" className="form-control" name="file" onChange={this.props.onChangeInput}/>
+                                <input type="file" className="form-control" id="attachment" name="attachment" />
                             </div>
                          </div>
-
                        </fieldset>
                     </form>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-                  <button type="button" className="btn btn-primary" onClick={this.props.onSubmitComment}>Save comment</button>
+                  <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.props.onCloseDialog}>Close</button>
+                  <button type="submit" className="btn btn-primary" onClick={this.props.onSubmitComment}>Save comment</button>
                 </div>
               </div>
             </div>

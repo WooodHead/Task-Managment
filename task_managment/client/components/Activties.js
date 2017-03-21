@@ -10,7 +10,8 @@ module.exports=Activties = React.createClass({
                 tasks:props.tasks,
                 errors:props.errors,
                 selectedActivties:[],
-                task:{}
+                task:{},
+                comment:{}
             };
         },
         loadTasksByUser:function(){
@@ -131,6 +132,50 @@ module.exports=Activties = React.createClass({
             task[field] = event.target.value;
             this.setState({task:task});
       },
+      // Add Comment
+        AddComment:function(e){
+            e.preventDefault();
+            var request = new XMLHttpRequest(), self = this;
+            request.open("POST", "/api/addComment", true);
+            request.setRequestHeader("Content-type", "application/json");
+            request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
+            request.onreadystatechange = function() {//Call a function when the state changes.
+                if(request.readyState == 4 && request.status == 200) {
+                    self.setState({
+                        comment:{}
+                    });
+                    self.hideCModal();
+                }
+                
+            }
+            request.send(JSON.stringify({comment:self.state.comment}));
+        },
+        showCModal:function(e){
+            e.stopPropagation();
+            if(e.target.type=='submit'){
+                console.log($(e.target).parent().siblings().find('input#tid').val());
+                var taskid=$(e.target).parent().siblings().find('input#tid').val();
+                this.setState({
+                    comment:{task_id:taskid}
+                });
+                $(ReactDOM.findDOMNode(this.refs.cmodal)).modal();
+            }
+            return false;
+
+         },
+         hideCModal:function(){
+            $(ReactDOM.findDOMNode(this.refs.cmodal)).modal('hide');
+            $(ReactDOM.findDOMNode(this.refs.cmodal)).find("input,textarea,select").val('').end()
+             .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+         },
+        changeComment:function(event){
+            const field = event.target.name;
+            const comment = this.state.comment;
+            comment[field] = event.target.value;
+            this.setState({comment:comment});
+         },
+
+      ///
 
      render:function(){
         return(
@@ -160,7 +205,7 @@ module.exports=Activties = React.createClass({
                                All Tasks
                             </div>
                             <div className="panel-body">
-                                <TaskTable tasks={this.state.tasks } handleSelection={this.handleSelection}/>
+                                <ActivityTable tasks={this.state.tasks } handleSelection={this.handleSelection} handleComment={this.showCModal}/>
                             </div>
                         </div>
                     </div>
@@ -168,18 +213,21 @@ module.exports=Activties = React.createClass({
                 <div className="row col-lg-12">
                     <ActivityDialog onSubmitTask={this.updateTask} task={this.state.task} ref='actmodal' onChangeInput={this.changeTask} onCloseDialog={this.closeDialog}></ActivityDialog>
                 </div>
+                <div className="row col-lg-12">
+                    <ComentDialog onSubmitComment={this.AddComment} comment={this.state.comment} ref='cmodal' onChangeInput={this.changeComment} onCloseDialog={this.hideCModal}></ComentDialog>
+                </div>
         </div>
         )
     }
  
 });
-TaskTable = React.createClass({
+ActivityTable = React.createClass({
     render: function(){
        var tasks =[],self=this;
        if(this.props.tasks){
            tasks=this.props.tasks.map (function(task) {
                 return (
-                <TaskObj key={ task._id } task={ task } handleSelection={self.props.handleSelection}></TaskObj>
+                <ActivityObj key={ task._id } task={ task } handleSelection={self.props.handleSelection} handleComment={self.props.handleComment}></ActivityObj>
                 )
             });
        }
@@ -207,7 +255,7 @@ TaskTable = React.createClass({
     }
 });
 
-TaskObj = React.createClass({
+ActivityObj = React.createClass({
     clickCheckBox:function(e){
         
         if (e.target.type !== 'checkbox') {
@@ -232,9 +280,8 @@ TaskObj = React.createClass({
             <td className="">{ this.props.task.description }</td>
             <td className="">{ this.props.task.status}</td>
             <td className="">{ this.props.task.estimation}</td>
-            <td className="">{ this.props.task.updated_at}</td>
-            <td className=""><button type="button" className="btn btn-primary">Add Comment</button></td>
-
+            <td className="">{ new Date(this.props.task.updated_at).toDateString()}</td>
+            <td className="" onClick={this.props.handleComment}><button className="btn btn-primary">Add Comment</button></td>
         </tr>
     )
     }
@@ -294,4 +341,43 @@ ActivityDialog=React.createClass({
         )
     }
 });
+ComentDialog=React.createClass({
+    render:function(){
+        return (
+            <div className="modal fade">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
+                  <h4 className="modal-title">Add Comment</h4>
+                </div>
+                <div className="modal-body">
+                 <form className="form-horizontal" onSubmit={this.props.onSubmitComment}>
+                        <fieldset>
 
+                        <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Details</label>
+                            <div className="col-sm-10">
+                                <textarea rows="3" className="form-control" name="details" placeholder="Details" value={this.props.comment.details} onChange={this.props.onChangeInput} />
+                            </div>
+                         </div>
+
+                           <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Select File</label>
+                            <div className="col-sm-10">
+                                <input type="file" className="form-control" id="attachment" />
+                            </div>
+                         </div>
+                       </fieldset>
+                    </form>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.props.onCloseDialog}>Close</button>
+                  <button type="submit" className="btn btn-primary" onClick={this.props.onSubmitComment}>Save comment</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+    }
+});
