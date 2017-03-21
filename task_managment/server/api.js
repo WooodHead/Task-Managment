@@ -9,8 +9,8 @@ var	JSX = require('node-jsx').install(),
 	Attachment = require('./models/Attachment'),
   	User = require('./models/User');
 var router = new express.Router();
-var multer  = require('multer')
-var upload = multer({ dest: 'uploads/' })
+var multer = require('multer');
+
  /////////// handle Tasks routes
 router.get('/tasks',function(req, res,next) {
 	  Task.getTasksByProjectsAndUser(0,function(tasks){
@@ -92,9 +92,9 @@ router.get('/tasks',function(req, res,next) {
   });
   /////////// End of Tasks
   /////////// Comments Routes
-	router.post('/addComment',upload.single('attachment'),function(req, res,next) {
+	router.post('/addComment',multer({ dest: './uploads/'}).single('attachment'),function(req, res,next) {
   		  var comment=req.body.comment;
-        var file=req.file;
+        var file=req.files;
     		User.getUserByEmail(req.session.email,function(user){
     			if(user._id){
     				comment.user_id=user._id;
