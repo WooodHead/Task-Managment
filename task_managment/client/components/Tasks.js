@@ -13,7 +13,8 @@ module.exports=Tasks = React.createClass({
 				tasks:props.tasks,
 				errors:props.errors,
 				task:{},
-				comment:{}
+				comment:{},
+				assignment:{}
 			};
 		},
 		componentDidMount: function(){
@@ -183,18 +184,18 @@ module.exports=Tasks = React.createClass({
 			var request = new XMLHttpRequest(), self = this;
 			var file = $("#attachment")[0].files[0];
 			var FD = new FormData();
-			FD.append("comment", "comment");
+			FD.append('comment',JSON.stringify(self.state.comment));
 			console.log(file);
 			FD.append("attachment", file);
 			console.log(FD);
 			request.open("POST", "/api/addComment", true);
-			request.setRequestHeader("Content-type", "multipart/form-data; boundary=---------------------------7da24f2e50046");
 			request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
 			request.onreadystatechange = function() {//Call a function when the state changes.
 				if(request.readyState == 4 && request.status == 200) {
 					self.setState({
 			 			comment:{}
 			 		});
+			 		console.log(JSON.parse(request.responseText));
 			 		self.hideCModal();
 				}
 				
@@ -226,7 +227,58 @@ module.exports=Tasks = React.createClass({
 	        comment[field] = event.target.value;
 	        this.setState({comment:comment});
 		 },
-	  	//////
+	  	/////////
+	  	////////
+	  	assignTask:function(e){
+			e.preventDefault();
+			var request = new XMLHttpRequest(), self = this;
+			request.open("POST", "/api/assignTask", true);
+			request.setRequestHeader("Content-type", "application/json");
+			request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
+			request.onreadystatechange = function() {//Call a function when the state changes.
+				if(request.readyState == 4 && request.status == 200) {
+					console.log(JSON.parse(request.responseText));
+					var response=JSON.parse(request.responseText);
+					var updated =[];
+                    if(self.state.tasks)
+                        updated=self.state.tasks;
+                    // Push them onto the end of the current tweets array
+                    if(response.task){
+                        updated = updated.filter(function( obj ) {
+                            return obj._id !== response.task._id;
+                        });
+                        updated.push(response.task);
+                        self.setState({tasks: updated,assignment:{},selectedTasks:[]});
+                    }else{
+                    	alert(response.error);
+                    }
+			 		self.hideModal();
+				}
+				
+			}
+			request.send(JSON.stringify({assignment:self.state.assignment}));
+		},
+	 	showModal:function(e){
+	 		if(this.state.selectedTasks.length==1){
+	            this.setState({
+	                assignment:{task_id:this.state.selectedTasks[0]}
+	            });
+	        }
+	        $(ReactDOM.findDOMNode(this.refs.assignment)).modal();
+
+		 },
+		 hideModal:function(){
+		 	$(ReactDOM.findDOMNode(this.refs.assignment)).modal('hide');
+		    $(ReactDOM.findDOMNode(this.refs.assignment)).find("input,textarea,select").val('').end()
+		     .find("input[type=checkbox], input[type=radio]").prop("checked", "").end();
+		 },
+	 	changeAssignment:function(event){
+	 		const field = event.target.name;
+	        const assignment = this.state.assignment;
+	        assignment[field] = event.target.value;
+	        this.setState({assignment:assignment});
+		 },
+	  	/////////
      render:function(){
      	var projectsName=[];
      	if(this.state.projectsName){
@@ -256,6 +308,7 @@ module.exports=Tasks = React.createClass({
 	                                <button className={this.state.selectedTasks.length==0?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleShowModal}  disabled={this.state.selectedTasks.length!=0}>New</button>
 	                                <button className={this.state.selectedTasks.length==1?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleShowModal} disabled={this.state.selectedTasks.length!=1}>Edit</button>                
 	                                <button className={this.state.selectedTasks.length!=0?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleDeletion} disabled={this.state.selectedTasks.length==0}>Delete</button>
+	                               	<button className={this.state.selectedTasks.length==1?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.showModal} disabled={this.state.selectedTasks.length!=1}>Assign Task</button>
 	                            </div>
 	                        </div>
 	                        <div className="col-sm-6">
@@ -283,6 +336,10 @@ module.exports=Tasks = React.createClass({
             	<div className="row col-lg-12">
                 	<ComentDialog onSubmitComment={this.AddComment} comment={this.state.comment} ref='cmodal' onChangeInput={this.changeComment} onCloseDialog={this.hideCModal}></ComentDialog>
             	</div>
+				<div className="row col-lg-12">
+                	<AssignmentDialog onSubmitAssignment={this.assignTask} assignment={this.state.assignment} ref='assignment' onChangeInput={this.changeAssignment} onCloseDialog={this.hideModal}></AssignmentDialog>
+            	</div>
+
         </div>
 		)
 	}
@@ -317,6 +374,7 @@ TaskTable = React.createClass({
                             <th>Description</th>
                             <th>Status</th>
                             <th>Estimation</th>
+                            <th>Assign To</th>
                             <th>Updated_at</th>
                             <th>Comments</th>
                         </tr>
@@ -354,6 +412,7 @@ TaskObj = React.createClass({
             <td className="">{ this.props.task.description }</td>
             <td className="">{ this.props.task.status}</td>
             <td className="">{ this.props.task.estimation}</td>
+            <td className="">{ this.props.task.user_id}</td>
             <td className="">{ new Date(this.props.task.updated_at).toDateString()}</td>
             <td className="" onClick={this.props.handleComment}><button className="btn btn-primary">Add Comment</button></td>
         </tr>
@@ -450,6 +509,54 @@ ComentDialog=React.createClass({
                 <div className="modal-footer">
                   <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.props.onCloseDialog}>Close</button>
                   <button type="submit" className="btn btn-primary" onClick={this.props.onSubmitComment}>Save comment</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+    }
+});
+AssignmentDialog=React.createClass({
+    render:function(){
+        return (
+            <div className="modal fade">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
+                  <h4 className="modal-title">Assignment Details</h4>
+                </div>
+                <div className="modal-body">
+                 <form className="form-horizontal" onSubmit={this.props.onSubmitAssignment} >
+                    	<fieldset>
+                    	 <div className="form-group">
+                    		<input type="hidden" id="tid" name="tid" value={this.props.assignment.task_id}/>
+                    	</div>
+                    	<div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Email</label>
+                            <div className="col-sm-10">
+                                <input type="email" className="form-control" name="email" placeholder="Email" value={this.props.assignment.email} onChange={this.props.onChangeInput}/>
+                            </div>
+                         </div>
+                         <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Subject</label>
+                            <div className="col-sm-10">
+                                <input type="text" className="form-control" name="subject" placeholder="Subject" value={this.props.assignment.subject} onChange={this.props.onChangeInput}/>
+                            </div>
+                         </div>
+                        <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Email Details</label>
+                            <div className="col-sm-10">
+                                <textarea rows="3" className="form-control" name="details" placeholder="Details" value={this.props.assignment.details} onChange={this.props.onChangeInput} />
+                            </div>
+                         </div>
+                  
+                       </fieldset>
+                    </form>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.props.onCloseDialog}>Close</button>
+                  <button type="submit" className="btn btn-primary" onClick={this.props.onSubmitAssignment}>Confirm and send Email</button>
                 </div>
               </div>
             </div>
