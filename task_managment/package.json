@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "watch": "watchify app.js -o public/js/bundle.js -v",
-    "browserify": "browserify -t [ babelify --presets [ react ] ] app.js -o public/js/bundle.js",
+    "watch": "watchify client/app.js -o public/js/bundle.js -v",
+    "browserify": "browserify -t [ babelify --presets [ react ] ] client/app.js -o public/js/bundle.js",
     "build": "npm run browserify",
     "start": "npm install"
   },
