@@ -1,7 +1,9 @@
 var React = require('react');
 var Auth =require('./modules/Auth1');
 var ReactDOM = require('react-dom');
-
+var ViewComments=require('./Dialogs/ViewComments');
+var TaskDialog=require('./Dialogs/TaskDialog'),
+    ComentDialog=require('./Dialogs/ComentDialog');
 module.exports=Activties = React.createClass({
 
         getInitialState: function(props){
@@ -11,7 +13,8 @@ module.exports=Activties = React.createClass({
                 errors:props.errors,
                 selectedActivties:[],
                 task:{},
-                comment:{}
+                comment:{},
+                comments:props.comments,
             };
         },
         loadTasksByUser:function(){
@@ -136,8 +139,11 @@ module.exports=Activties = React.createClass({
         AddComment:function(e){
             e.preventDefault();
             var request = new XMLHttpRequest(), self = this;
+            var file = $("#attachment")[0].files[0];
+            var FD = new FormData();
+            FD.append('comment',JSON.stringify(self.state.comment));
+            FD.append("attachment", file);
             request.open("POST", "/api/addComment", true);
-            request.setRequestHeader("Content-type", "application/json");
             request.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
             request.onreadystatechange = function() {//Call a function when the state changes.
                 if(request.readyState == 4 && request.status == 200) {
@@ -148,17 +154,37 @@ module.exports=Activties = React.createClass({
                 }
                 
             }
-            request.send(JSON.stringify({comment:self.state.comment}));
+            request.send(FD);
         },
         showCModal:function(e){
             e.stopPropagation();
             if(e.target.type=='submit'){
-                console.log($(e.target).parent().siblings().find('input#tid').val());
                 var taskid=$(e.target).parent().siblings().find('input#tid').val();
-                this.setState({
-                    comment:{task_id:taskid}
-                });
-                $(ReactDOM.findDOMNode(this.refs.cmodal)).modal();
+                if(taskid){
+                    if(e.target.id=='view1'){
+                     const xhr = new XMLHttpRequest(),self=this;
+                      xhr.open('get', '/api/getCommentByTask?taskid='+taskid, true);
+                      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                      xhr.setRequestHeader('Authorization', 'bearer '+Auth.getToken());
+                      xhr.addEventListener('load', function(){
+                        if (xhr.status === 200) {
+                          var comments=JSON.parse(xhr.responseText);
+                          self.setState({
+                            comments: comments
+                          });
+                           $(ReactDOM.findDOMNode(self.refs.ViewComment)).modal();
+                        } else {
+                         
+                        }
+                      });
+                      xhr.send(null);
+                    }else{
+                        this.setState({
+                            comment:{task_id:taskid}
+                        });
+                        $(ReactDOM.findDOMNode(this.refs.cmodal)).modal();
+                    }
+                }
             }
             return false;
 
@@ -211,10 +237,13 @@ module.exports=Activties = React.createClass({
                     </div>
                 </div>
                 <div className="row col-lg-12">
-                    <ActivityDialog onSubmitTask={this.updateTask} task={this.state.task} ref='actmodal' onChangeInput={this.changeTask} onCloseDialog={this.closeDialog}></ActivityDialog>
+                    <TaskDialog onSubmitTask={this.updateTask} task={this.state.task} ref='actmodal' onChangeInput={this.changeTask} onCloseDialog={this.closeDialog}></TaskDialog>
                 </div>
                 <div className="row col-lg-12">
                     <ComentDialog onSubmitComment={this.AddComment} comment={this.state.comment} ref='cmodal' onChangeInput={this.changeComment} onCloseDialog={this.hideCModal}></ComentDialog>
+                </div>
+                <div className="row col-lg-12">
+                    <ViewComments  ref='ViewComment' comments={this.state.comments}></ViewComments>
                 </div>
         </div>
         )
@@ -237,7 +266,7 @@ ActivityTable = React.createClass({
                 <table className="table table-striped table-bordered table-hover">
                     <thead>
                         <tr role="row">
-                            <th className="center-block"><input type="checkbox" /></th>
+                            <th ></th>
                             <th>Name</th>
                             <th>Description</th>
                             <th>Status</th>
@@ -281,103 +310,8 @@ ActivityObj = React.createClass({
             <td className="">{ this.props.task.status}</td>
             <td className="">{ this.props.task.estimation}</td>
             <td className="">{ new Date(this.props.task.updated_at).toDateString()}</td>
-            <td className="" onClick={this.props.handleComment}><button className="btn btn-primary">Add Comment</button></td>
+            <td className="" onClick={this.props.handleComment}><button className="btn btn-primary">Add</button><button id="view1" className="btn btn-primary">View</button></td>
         </tr>
     )
-    }
-});
-ActivityDialog=React.createClass({
-    render:function(){
-        return (
-            <div className="modal fade">
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
-                  <h4 className="modal-title">Edit Task</h4>
-                </div>
-                <div className="modal-body">
-                 <form className="form-horizontal" onSubmit={this.props.onSubmitTask}>
-                    <fieldset>
-
-                        <div className="form-group">
-                            <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Name</label>
-                            <div className="col-sm-10">
-                                <input type="text" className="form-control" name="name" placeholder="Name" value={this.props.task.name} onChange={this.props.onChangeInput} disabled={this.props.task._id}/>
-                            </div>
-                         </div>
-
-                           <div className="form-group">
-                            <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Description</label>
-                            <div className="col-sm-10">
-                                <input type="text" className="form-control" name="description" placeholder="Description" value={this.props.task.description} onChange={this.props.onChangeInput}/>
-                            </div>
-                         </div>
-                         
-                          <div className="form-group">
-                            <label  className="col-sm-2 control-label" htmlFor ="inputStatus">Status</label>
-                            <div className="col-sm-10">
-                                <input type="text" className="form-control" name="status" placeholder="Status" value={this.props.task.status} onChange={this.props.onChangeInput}/>
-                            </div>
-                         </div>
-
-                          <div className="form-group">
-                            <label  className="col-sm-2 control-label" htmlFor ="inputEstimation">Estimation</label>
-                            <div className="col-sm-10">
-                                <input type="text" className="form-control" name="estimation" placeholder="Estimation" value={this.props.task.estimation} onChange={this.props.onChangeInput}/>
-                            </div>
-                         </div>
-
-                       </fieldset>
-                    </form>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.props.onCloseDialog}>Close</button>
-                  <button type="button" className="btn btn-primary" onClick={this.props.onSubmitTask}>Save changes</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-    }
-});
-ComentDialog=React.createClass({
-    render:function(){
-        return (
-            <div className="modal fade">
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
-                  <h4 className="modal-title">Add Comment</h4>
-                </div>
-                <div className="modal-body">
-                 <form className="form-horizontal" onSubmit={this.props.onSubmitComment}>
-                        <fieldset>
-
-                        <div className="form-group">
-                            <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Details</label>
-                            <div className="col-sm-10">
-                                <textarea rows="3" className="form-control" name="details" placeholder="Details" value={this.props.comment.details} onChange={this.props.onChangeInput} />
-                            </div>
-                         </div>
-
-                           <div className="form-group">
-                            <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Select File</label>
-                            <div className="col-sm-10">
-                                <input type="file" className="form-control" id="attachment" />
-                            </div>
-                         </div>
-                       </fieldset>
-                    </form>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.props.onCloseDialog}>Close</button>
-                  <button type="submit" className="btn btn-primary" onClick={this.props.onSubmitComment}>Save comment</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
     }
 });
