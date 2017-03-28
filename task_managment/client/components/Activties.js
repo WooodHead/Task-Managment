@@ -66,6 +66,7 @@ module.exports=Activties = React.createClass({
                         });
                         updated.push(JSON.parse(request.responseText));
                         self.setState({tasks: updated,task:{},selectedActivties:[]});
+                        $(ReactDOM.findDOMNode(self.refs.acttable)).find("input[type=checkbox]").prop("checked", "").end();
                     }
                       $(ReactDOM.findDOMNode(self.refs.actmodal)).modal('hide');
                     $(ReactDOM.findDOMNode(self.refs.actmodal)).find("input,textarea,select").val('').end()
@@ -231,7 +232,7 @@ module.exports=Activties = React.createClass({
                                All Tasks
                             </div>
                             <div className="panel-body">
-                                <ActivityTable tasks={this.state.tasks } handleSelection={this.handleSelection} handleComment={this.showCModal}/>
+                                <ActivityTable ref='acttable' tasks={this.state.tasks } handleSelection={this.handleSelection} handleComment={this.showCModal}/>
                             </div>
                         </div>
                     </div>

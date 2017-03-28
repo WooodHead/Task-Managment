@@ -124,6 +124,7 @@ module.exports=Tasks = React.createClass({
                             return obj._id !== self.state.task._id;
                         });
 						updated.push(JSON.parse(request.responseText));
+						 $(ReactDOM.findDOMNode(self.refs.tasktable)).find("input[type=checkbox]").prop("checked", "").end();
                     }
 				}
 				self.setState({tasks: updated,task:{},selectedTasks:[]});
@@ -270,6 +271,7 @@ module.exports=Tasks = React.createClass({
                         });
                         updated.push(response.task);
                         self.setState({tasks: updated,assignment:{},selectedTasks:[]});
+                    	$(ReactDOM.findDOMNode(self.refs.tasktable)).find("input[type=checkbox]").prop("checked", "").end();
                     }else{
                     	alert(response.error);
                     }
@@ -346,7 +348,7 @@ module.exports=Tasks = React.createClass({
                                All Tasks Of Selected Project
                             </div>
                             <div className="panel-body">
-                                <TaskTable tasks={this.state.tasks} handleSelection={this.handleSelection} handleComment={this.showCModal}/>
+                                <TaskTable ref='tasktable' tasks={this.state.tasks} handleSelection={this.handleSelection} handleComment={this.showCModal}/>
                             </div>
                         </div>
                     </div>

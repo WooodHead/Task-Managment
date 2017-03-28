@@ -57,6 +57,19 @@ module.exports=Projects = React.createClass({
         $(ReactDOM.findDOMNode(this.refs.projectmodal)).modal();
 
     },
+    handleInviteModal:function(){
+        // if(this.state.selectedIds.length==1){
+        //     var self=this;
+        //     var result = this.state.projects.filter(function( obj ) {
+        //       return obj._id ==self.state.selectedIds[0];
+        //     });
+        //     this.setState({
+        //         project:result[0]
+        //     });
+        // }
+        $(ReactDOM.findDOMNode(this.refs.invitemodal)).modal();
+
+    },
     handleSelection:function(val,flag){
         if(flag){
             this.setState({ 
@@ -73,6 +86,7 @@ module.exports=Projects = React.createClass({
             });
         }
     },
+
     handleDeletion:function(){
         var request = new XMLHttpRequest(), self = this;
             request.open("DELETE", "/api/deleteProjects", true);
@@ -126,6 +140,7 @@ module.exports=Projects = React.createClass({
                             return obj._id !== self.state.project._id;
                         });
                         updated.push(JSON.parse(request.responseText));
+                        $(ReactDOM.findDOMNode(self.refs.projecttable)).find("input[type=checkbox]").prop("checked", "").end();
                     }
                 }
                 self.setState({projects: updated,project:{},selectedIds:[]});
@@ -149,6 +164,7 @@ module.exports=Projects = React.createClass({
                                 <button className={this.state.selectedIds.length==0?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleShowModal} disabled={this.state.selectedIds.length!=0}>New</button>
                                 <button className={this.state.selectedIds.length==1?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleShowModal} disabled={this.state.selectedIds.length!=1}>Edit</button>                
                                 <button className={this.state.selectedIds.length!=0?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleDeletion} disabled={this.state.selectedIds.length==0}>Delete</button>
+                                <button className={this.state.selectedIds.length==1?"btn btn-primary active":"btn btn-primary disabled"} onClick={this.handleInviteModal} disabled={this.state.selectedIds.length!=1}>Invite</button>                
                             </div>
                         </div>
                         <div className="col-sm-6">
@@ -164,14 +180,18 @@ module.exports=Projects = React.createClass({
                                All Projects
                             </div>
                             <div className="panel-body">
-                                <ProjectsTable projects={this.state.projects } handleSelection={this.handleSelection}/>
+                                <ProjectsTable  ref='projecttable' projects={this.state.projects } handleSelection={this.handleSelection}/>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="row col-lg-12">
-                <ProjectDialog ref='projectmodal' errors={this.state.errors} onChangeInput={this.changeProject} onSubmitForm={this.processForm} onCloseDialog={this.closeDialog} project={this.state.project}/>
+                 <ProjectDialog ref='projectmodal' errors={this.state.errors} onChangeInput={this.changeProject} onSubmitForm={this.processForm} onCloseDialog={this.closeDialog} project={this.state.project}/>
                 </div>
+                <div className="row col-lg-12">
+                    <InviteDialog ref='invitemodal' />
+                </div>
+                
             </div>            
 		)
 	}
@@ -194,7 +214,7 @@ ProjectsTable= React.createClass({
                 <table className="table table-striped table-bordered table-hover">
                     <thead>
                         <tr role="row">
-                            <th className="center-block"><input type="checkbox" /></th>
+                            <th></th>
                             <th>Name</th>
                             <th>Description</th>
                             <th>Status</th>
@@ -247,7 +267,7 @@ ProjectDialog=React.createClass({
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
+                   <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.onCloseDialog}><span aria-hidden="true">&times;</span></button>
                   <h4 className="modal-title">{this.props.project._id?'Edit Project':'Add Project'}</h4>
                 </div>
                 <div className="modal-body">
@@ -295,3 +315,48 @@ ProjectDialog=React.createClass({
         )
     }
 });
+InviteDialog=React.createClass({
+    render:function(){
+        return (
+            <div className="modal fade">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close" ><span aria-hidden="true">&times;</span></button>
+                  <h4 className="modal-title">Invite Users To Project {}</h4>
+                </div>
+                <div className="modal-body">
+                 <form className="form-horizontal" >
+                    <fieldset>
+
+                        <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputp_name">Emails</label>
+                            <div className="col-sm-10">
+                                <input type="text" className="form-control" name="p_name" placeholder="Emails" />
+                            </div>
+                         </div>
+
+                           <div className="form-group">
+                            <label  className="col-sm-2 control-label" htmlFor ="inputdescription">Description</label>
+                            <div className="col-sm-10">
+                                <input type="text" className="form-control" name="description" placeholder="Description" />
+                            </div>
+                         </div>
+                         
+
+                       </fieldset>
+                    </form>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-default" data-dismiss="modal" >Close</button>
+                  <button type="button" className="btn btn-primary" >Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+    }
+});
+
+
+

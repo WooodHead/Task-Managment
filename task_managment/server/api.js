@@ -1,4 +1,5 @@
-var express = require('express');
+var express = require('express'),
+appEmail = require('./utils/gmail1Config');
 var	JSX = require('node-jsx').install(),
 	React = require('react'),
 	ReactDOMServer  = require('react-dom/server'),
@@ -88,13 +89,19 @@ router.get('/tasks',function(req, res,next) {
           var updatedTask={user_id:user.name};
           Task.editTask(assignment.task_id,updatedTask, function(task) {
                 if(task){
-                    // gmailConfig({to :assignment.email,subject: assignment.subject,text : assignment.details}, function(error, response){
-                    //   if(error){
-                    //      res.send({error:error,task:task});
-                    //   }else{
-                          res.send(JSON.stringify({task:task}));
-                    //    }
-                    // });
+                    appEmail.mailer.send('email', {
+                            to: assignment.email, // REQUIRED. This can be a comma delimited string just like a normal email to field. 
+                            subject: 'Task Invitation '+assignment.subject, // REQUIRED.
+                            otherProperty:{ 'default':'A new task assign to you','Name':task.name,'details':task.description+' '+assignment.details} // All additional properties are also passed to the template as local variables.
+                          }, function (err) {
+                            if (err) {
+                              // handle error
+                              console.log(err);
+                              res.send('There was an error sending the email');
+                              return;
+                            }
+                              res.send(JSON.stringify({task:task}));
+                          });
                 }
           });
       }else{
@@ -116,19 +123,29 @@ router.get('/tasks',function(req, res,next) {
 
     		User.getUserByEmail(req.session.email,function(user){
     			if(user._id){
-    				comment.user_id=user.name;
-        			Comment.addComment(comment, function(result) {
-                  var commentRes=result;
-                  if(attachment){
-                      attachment.user_id=comment.user_id;
-                      attachment.task_id=comment.task_id;
-                      Attachment.addAttachment(attachment,function(attachmentRes){
-                          res.send({commentRes:commentRes,attachmentRes:attachmentRes});
-                      });
+            if(comment.details){
+        				  comment.user_id=user.name;
+            			Comment.addComment(comment, function(result) {
+                      var commentRes=result;
+                      if(attachment){
+                          attachment.user_id=comment.user_id;
+                          attachment.task_id=comment.task_id;
+                          Attachment.addAttachment(attachment,function(attachmentRes){
+                              res.send({commentRes:commentRes,attachmentRes:attachmentRes});
+                          });
+                      }else{
+              				  res.send({commentRes:commentRes,attachmentRes:''});
+                      }
+            			});
+              }else if(attachment){
+                          attachment.user_id=user.name;
+                          attachment.task_id=comment.task_id;
+                          Attachment.addAttachment(attachment,function(attachmentRes){
+                              res.send({commentRes:'',attachmentRes:attachmentRes});
+                          });
                   }else{
-          				  res.send({commentRes:commentRes,attachmentRes:''});
+                      res.send({commentRes:'',attachmentRes:''});
                   }
-        			});
         		}else{
         			res.send({error:'cannot find logged user'});
         		}

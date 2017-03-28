@@ -36,6 +36,7 @@ app.use("/", express.static(__dirname + "/public/"));
 app.use('/', express.static(__dirname + '/node_modules/bootstrap/dist/'));
 app.use('/', express.static(__dirname + '/node_modules/font-awesome/'));
 app.use('/', express.static(__dirname + '/node_modules/jquery/dist/'));
+app.use('/', express.static(__dirname + 'server/uploads'));
 app.use(express.static(__dirname + 'server/uploads'));
 
 
