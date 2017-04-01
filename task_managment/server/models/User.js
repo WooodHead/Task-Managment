@@ -2,7 +2,10 @@ var mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 // Create a new schema for our users data
 var schema = new mongoose.Schema({
-    name       : String,
+    name       : {
+        type: String,
+        index: { unique: true }
+    },
     email    : {
         type: String,
         index: { unique: true }
@@ -37,7 +40,23 @@ schema.pre('save', function saveHook(next) {
   });
 });
 
+schema.statics.getUsersByQuery = function(queryparams,projection, callback) {
 
+  var tasks = [];
+  // Query the db, using skip and limit to achieve page chunks
+  User.find(queryparams,projection,{}).exec(function(err,docs){
+
+    // If everything is cool...
+    if(!err) {
+      users = docs;  // We got users
+    }
+
+    // Pass them back to the specified callback
+    callback(tasks);
+
+  });
+
+};
 // Create a static getuserss method to return users data from the db
 schema.statics.getUsers = function(page, skip, callback) {
 

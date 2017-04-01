@@ -17,7 +17,7 @@ schema.statics.getTasksByQuery = function(queryparams, callback) {
 
   var tasks = [];
   // Query the db, using skip and limit to achieve page chunks
-  Task.find(queryparams,'name description status estimation created_at updated_at',{}).exec(function(err,docs){
+  Task.find(queryparams,'name description status estimation created_at updated_at user_id',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -35,7 +35,7 @@ schema.statics.getTasksByProject = function(projectid, callback) {
 
   var tasks = [];
   // Query the db, using skip and limit to achieve page chunks
-  Task.find({project_id:projectid},'name description status estimation created_at updated_at',{}).exec(function(err,docs){
+  Task.find({project_id:projectid},'name description status estimation created_at updated_at user_id',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -71,7 +71,7 @@ schema.statics.editTask = function(id,task, callback) {
     task.updated_at=new Date();
   // Query the db, using skip and limit to achieve page chunks
   var result;
-  Task.findOneAndUpdate({ "_id": id }, { "$set":{description:task.description,status:task.status,estimation:task.estimation,updated_at:task.updated_at}},{new: true},function(err,docs){
+  Task.findOneAndUpdate({ "_id": id }, { "$set":task},{new: true},function(err,docs){
 
     // If everything is cool...
     if(!err) {

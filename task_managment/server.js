@@ -8,9 +8,10 @@ var express = require('express'),
     passport=require('passport'),
     authRoutes = require('./server/auth');
 var bodyParser = require('body-parser');
-var multer = require('multer');
-var upload = multer({ dest: 'uploads/'}); 
 var cookieParser = require('cookie-parser');
+//var multer  = require('multer')
+//var upload = multer({ dest: 'uploads/' })
+
 var session = require('express-session');
 // Create an express instance and set a port variable
 var app = express();
@@ -25,7 +26,7 @@ app.set('view engine', 'handlebars');
 app.disable('etag');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(upload.array());
+//app.use(multer({ dest: 'uploads/'}));
 
 // Connect to our mongo database
 mongoose.connect('mongodb://localhost/task_managment');
@@ -35,6 +36,9 @@ app.use("/", express.static(__dirname + "/public/"));
 app.use('/', express.static(__dirname + '/node_modules/bootstrap/dist/'));
 app.use('/', express.static(__dirname + '/node_modules/font-awesome/'));
 app.use('/', express.static(__dirname + '/node_modules/jquery/dist/'));
+app.use('/', express.static(__dirname + 'server/uploads'));
+app.use(express.static(__dirname + 'server/uploads'));
+
 
 app.use(cookieParser());
 app.use(session({secret: 'ssshhhhh',

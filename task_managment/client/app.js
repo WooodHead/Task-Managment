@@ -7,17 +7,17 @@ var Router=require('react-router').Router,
  IndexRoute=require('react-router').IndexRoute,
  hashHistory=require('react-router').hashHistory,
  browserHistory=require('react-router').browserHistory;
-var TaskManagmentApp = require('./client/components/TaskManagmentApp');
-var Home = require('./client/components/Home.js');
-var Dashboard = require('./client/components/Dashboard.js');
+var TaskManagmentApp = require('./components/TaskManagmentApp');
+var Home = require('./components/Home.js');
+var Dashboard = require('./components/Dashboard.js');
 
-var Projects = require('./client/components/Projects.js');
-var Tasks = require('./client/components/Tasks.js');
-var Activties = require('./client/components/Activties.js');
-var LoginPage  = require('./client/components/container/LoginPage.js');
-var Auth  = require('./client/components/modules/Auth1.js');
-var SignupPage  = require('./client/components/container/SignupPage.js');
-var handleLogout  = require('./client/components/container/handleLogout.js');
+var Projects = require('./components/Projects.js');
+var Tasks = require('./components/Tasks.js');
+var Activties = require('./components/Activties.js');
+var LoginPage  = require('./components/container/LoginPage.js');
+var Auth  = require('./components/modules/Auth1.js');
+var SignupPage  = require('./components/container/SignupPage.js');
+var handleLogout  = require('./components/container/handleLogout.js');
 
 
 // Snag the initial state that was passed from the server side

@@ -2,7 +2,13 @@ var mongoose = require('mongoose');
 
 // Create a new schema for our tweet data
 var schema = new mongoose.Schema({
-  file_name     :String, 
+  filename     :String, 
+  originalname:String, 
+  path:String,
+  mimetype:String,
+  size:Number,
+  encoding:String,
+  upload_at:Date,
   user_id:String,
   task_id: String
 });
@@ -28,6 +34,7 @@ schema.statics.getAttachment= function(userid, skip, callback) {
 schema.statics.addAttachment = function(attachment, callback) {
   var result = [];
   // Query the db, using skip and limit to achieve page chunks
+  attachment.upload_at=new Date();
   Attachment.create(attachment,function(err,docs){
 
     // If everything is cool...

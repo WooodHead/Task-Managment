@@ -13,7 +13,7 @@ schema.statics.getCommentsByTaskId= function(taskid, callback) {
 
   var comments = [];
   // Query the db, using skip and limit to achieve page chunks
-  Comment.find({task_id:taskid},'details created_at task_id',{}).exec(function(err,docs){
+  Comment.find({task_id:taskid},'details created_at task_id user_id',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -31,7 +31,7 @@ schema.statics.getCommentsByUserId= function(userid, callback) {
 
   var comments = [];
   // Query the db, using skip and limit to achieve page chunks
-  Comment.find({user_id:userid},'details created_at task_id',{}).exec(function(err,docs){
+  Comment.find({user_id:userid},'details created_at task_id user_id',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
@@ -49,7 +49,7 @@ schema.statics.getCommentsByUserAndTaskID= function(query, callback) {
 
   var comments = [];
   // Query the db, using skip and limit to achieve page chunks
-  Comment.find({user_id:query.userid,task_id:query.taskid},'details created_at task_id',{}).exec(function(err,docs){
+  Comment.find({user_id:query.userid,task_id:query.taskid},'details created_at task_id user_id',{}).exec(function(err,docs){
 
     // If everything is cool...
     if(!err) {
